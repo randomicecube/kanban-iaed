@@ -33,37 +33,26 @@
 
 /* -----------------------------------PROTOTYPES------------------------------------ */
 
-void add_task(char s[], int tasks);
-void list_tasks(char s[], int tasks);
-void add_users(char s[], int users);
-void move_task(char s[], int users, int tasks, int atv);
-void list_t_atv(char s[]);
-void add_atv(char s[], int atv);
+/* adds a task to the system */
+void addTask(char read[]);
+void advance(char read[]);
+void addUser(char read[]);
 
-/* -------------------------------------STRUCTS------------------------------------- */
+/* -----------------------------------GLOBAL VARS----------------------------------- */
 
-/* the struct in hand represents an instance of an activity */
-typedef struct activity{
-	/*stores the activity's description */
-	char desc[MAX_ATVL];
-} atv;
-
-/* the struct in hand represents an instance of a task */
-typedef struct task{
-	/* stores the task's description */
-	char desc[MAX_TASKL];
-	/* stores the task's predicted duration */
-	int predicted;
-	/* stores the task's start time */
-	int startTime;
-	/* stores the task's ID */
-	int id;
-} task;
-
-/* the struct in hand represents an instance of a user */
-typedef struct user{
-	/* stores the user's description/username */
-	char desc[MAX_USERL];
-} user;
-
-
+/* stores the program's state - at 0 the program keeps running, at 1 it stops */
+static int state = 0;
+/* the program's current time */
+static int currentTime = 0;
+/* stores the amounts of tasks, users and activities, respectively */
+static int amounts[3];
+/* stores the tasks' predicted duration, starting time and id, respectively */
+static int pTask[MAX_TASK][3];
+/*stores all the tasks' descriptions */
+static char dTask[MAX_TASK][MAX_TASKL];
+/*stores the activity the tasks are currently in
+ * static char aTask[MAX_TASK][MAX_ATVL]; */
+/* stores the users' descriptions */
+static char user[MAX_USER][MAX_USERL];
+/* stores the activities' descriptions */
+/*static char atv[MAX_ATV][MAX_ATVL]; */
