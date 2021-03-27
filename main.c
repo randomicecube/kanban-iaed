@@ -14,6 +14,10 @@ int main(){
 
 	char input[MAX_LENGTH];
 
+	atv[0] = "TO DO";
+	atv[1] = "IN PROGRESS";
+	atv[2] = "DONE";
+
 	do{
 		fgets(input, MAX_LENGTH, stdin);
 		switch(input[0]){
@@ -41,7 +45,7 @@ int main(){
 	return 0;
 }
 
-/* adds a task to the system */
+/* adds a task to the system - 't' command */
 void addTask(char read[]){
 	
 	int counter = 0, j;
@@ -57,7 +61,7 @@ void addTask(char read[]){
 	char temp[MAX_TASKL];
 
 	if(amounts[0] == MAX_TASK){
-                printf("too many tasks\n");
+    	printf("too many tasks\n");
 	}
 	
 	else{
@@ -101,7 +105,7 @@ void addTask(char read[]){
 	}
 }
 
-/* adds a user to the system */
+/* adds a user to the system - 'u' command*/
 void addUser(char read[]){
 	int counter = 0, j;
 	int i = START;
@@ -133,7 +137,7 @@ void addUser(char read[]){
 		
         }
 
-        for(j = 0; j < amounts[0] && dup == 0; j++){
+        for(j = 0; j < amounts[1] && dup == 0; j++){
         	if (strcmp(temp, user[j]) == 0){
                 	dup = 1;
                 }
@@ -142,13 +146,13 @@ void addUser(char read[]){
         if(dup == 1){
         	printf("user already exists\n");
         }
-	else if(amounts[1] == MAX_USER){
+	else if(amounts[1] == MAX_USER && strcmp(temp, "") != 0){
 		printf("too many users\n");
 	}
-        else if(strcmp(temp, "") != 0){
-        	strcpy(user[amounts[1]], temp);
-                amounts[1]++;
-     	}
+    else if(strcmp(temp, "") != 0){
+    	strcpy(user[amounts[1]], temp);
+        amounts[1]++;
+ 	}
 	else{
 		for(j = 0; j < amounts[1]; j++){
 			printf("%s\n", user[j]);
@@ -157,51 +161,57 @@ void addUser(char read[]){
 }
 
 
-/* adds an activity to the system */
+/* adds an activity to the system - 'a' command */
 void addActivity(char read[]){
-	int counter = 0, j;
-        int i = START;
-        /* 0 if there's no duplicate description found, 1 if there is */
-        int dup = 0;
-        /* contains the currently read character from read[] */
-        char c = read[i];
-        /* temporary array containing an activity's description */
-        char temp[MAX_TASKL];
+	int counter = 0, j, min = 0;
+    int i = START;
+    /* 0 if there's no duplicate description found, 1 if there is */
+    int dup = 0;
+    /* contains the currently read character from read[] */
+    char c = read[i];
+    /* temporary array containing an activity's description */
+    char temp[MAX_TASKL];
 
-        while(c != '\0' && c != '\n' && counter < MAX_TASKL){
-                temp[counter] = c;
-                counter ++;
-                i++;
-                c = read[i];
-        }
+    while(c != '\0' && c != '\n' && counter < MAX_ATVL){
+		if(c >= 'a' && c <= 'z'){
+			min = 1;
+		}
+    	temp[counter] = c;
+        counter ++;
+        i++;
+        c = read[i];
+    }
 
-        for(j = 0; j < amounts[0] && dup == 0; j++){
-                if (strcmp(temp, user[j]) == 0){
-                        dup = 1;
-                }
+    for(j = 0; j < amounts[2] && dup == 0; j++){
+    	if (strcmp(temp, atv[j]) == 0){
+        	dup = 1;
         }
+    }
 
-        if(dup == 1){
-                printf("user already exists\n");
+    if(dup == 1){
+    	printf("duplicate activity\n");
+    }
+	else if(min == 1){
+		printf("invalid description\n");
+	}
+    else if(amounts[2] == MAX_ATV && strcmp(temp, "") != 0){
+    	printf("too many activities\n");
+    }
+    else if(strcmp(temp, "") != 0){
+    	strcpy(atv[amounts[2]], temp);
+        amounts[2]++;
+    }
+    else{
+    	for(j = 0; j < amounts[2]; j++){
+        	printf("%s\n", atv[j]);
         }
-        else if(amounts[1] == MAX_USER){
-                printf("too many users\n");
-        }
-        else if(strcmp(temp, "") != 0){
-                strcpy(user[amounts[1]], temp);
-                amounts[1]++;
-        }
-        else{
-                for(j = 0; j < amounts[1]; j++){
-                        printf("%s\n", user[j]);
-                }
-        }
+    }
 
 }
 
 
 
-/* advances the system's time */
+/* advances the system's time - 'n' command*/
 void advance(char read[]){
 	
 	int i = START;
