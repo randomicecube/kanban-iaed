@@ -14,9 +14,9 @@ int main(){
 
 	char input[MAX_LENGTH];
 
-	atv[0] = "TO DO";
-	atv[1] = "IN PROGRESS";
-	atv[2] = "DONE";
+	strcpy(atv[0], "TO DO");
+	strcpy(atv[1], "IN PROGRESS");
+	strcpy(atv[2], "DONE");
 
 	do{
 		fgets(input, MAX_LENGTH, stdin);
@@ -66,7 +66,7 @@ void addTask(char read[]){
 	
 	else{
 
-		while(c != ' '){
+		while(c != ' ' && c != '\t'){
 			if(c >= '0' && c <= '9'){
 		 		pd = pd * 10 + (c - '0');
 			}
@@ -77,7 +77,7 @@ void addTask(char read[]){
 		i++; /* to account for the space between <duration> and <description> */
 		c = read[i];
 
-		while(c != '\0' && c != '\n' && counter < MAX_TASKL){
+		while(c != '\0' && c != '\n' && c != EOF && counter < MAX_TASKL){
 			temp[counter] = c;
 			counter ++;
 			i++;
@@ -118,7 +118,7 @@ void addUser(char read[]){
 	/* while at 0, temp doesn't store characters */
 	int space = 0;
 
-        while(c != '\0' && c != '\n' && (c != ' ' || space == 0) && counter < MAX_TASKL){
+        while(c != '\0' && c != '\n' && c != EOF && (c != ' ' || space == 0) && counter < MAX_TASKL){
         	if(space == 0){
 			if(c != '0'){
 				space = 1;
@@ -172,7 +172,7 @@ void addActivity(char read[]){
     /* temporary array containing an activity's description */
     char temp[MAX_TASKL];
 
-    while(c != '\0' && c != '\n' && counter < MAX_ATVL){
+    while(c != '\0' && c != '\n' && c != EOF && counter < MAX_ATVL){
 		if(c >= 'a' && c <= 'z'){
 			min = 1;
 		}
@@ -209,8 +209,6 @@ void addActivity(char read[]){
 
 }
 
-
-
 /* advances the system's time - 'n' command*/
 void advance(char read[]){
 	
@@ -219,7 +217,7 @@ void advance(char read[]){
 	char c = read[i];
 	int neg = 0;
 
-	while(c != '\0' && c != '\n' && c != ' ' && state == 0){
+	while(c != '\0' && c != '\n' && c != ' ' && c != EOF && state == 0){
 		if(c == '-'){
 			neg = 1;
 		}
