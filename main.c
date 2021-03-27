@@ -28,7 +28,9 @@ int main(){
 				break;
 			case 'u':
 				addUser(input);
-				break;				
+				break;
+			case 'a':
+				addActivity(input);				
 			default:
 				break;	
 		}		
@@ -109,12 +111,26 @@ void addUser(char read[]){
         char c = read[i];
         /* temporary array containing a user's description */
         char temp[MAX_TASKL];
+	/* while at 0, temp doesn't store characters */
+	int space = 0;
 
-        while(c != '\0' && c != '\n' && counter < MAX_TASKL){
-        	temp[counter] = c;
-                counter ++;
-                i++;
-                c = read[i];
+        while(c != '\0' && c != '\n' && (c != ' ' || space == 0) && counter < MAX_TASKL){
+        	if(space == 0){
+			if(c != '0'){
+				space = 1;
+				temp[counter] = c;
+				counter++;
+				i++;
+				c = read[i];
+			}
+		}
+		else{
+			temp[counter] = c;
+                	counter ++;
+                	i++;
+                	c = read[i];
+		}
+		
         }
 
         for(j = 0; j < amounts[0] && dup == 0; j++){
@@ -139,6 +155,51 @@ void addUser(char read[]){
 		}
 	}
 }
+
+
+/* adds an activity to the system */
+void addActivity(char read[]){
+	int counter = 0, j;
+        int i = START;
+        /* 0 if there's no duplicate description found, 1 if there is */
+        int dup = 0;
+        /* contains the currently read character from read[] */
+        char c = read[i];
+        /* temporary array containing an activity's description */
+        char temp[MAX_TASKL];
+
+        while(c != '\0' && c != '\n' && counter < MAX_TASKL){
+                temp[counter] = c;
+                counter ++;
+                i++;
+                c = read[i];
+        }
+
+        for(j = 0; j < amounts[0] && dup == 0; j++){
+                if (strcmp(temp, user[j]) == 0){
+                        dup = 1;
+                }
+        }
+
+        if(dup == 1){
+                printf("user already exists\n");
+        }
+        else if(amounts[1] == MAX_USER){
+                printf("too many users\n");
+        }
+        else if(strcmp(temp, "") != 0){
+                strcpy(user[amounts[1]], temp);
+                amounts[1]++;
+        }
+        else{
+                for(j = 0; j < amounts[1]; j++){
+                        printf("%s\n", user[j]);
+                }
+        }
+
+}
+
+
 
 /* advances the system's time */
 void advance(char read[]){

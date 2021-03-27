@@ -33,10 +33,10 @@
 
 /* -----------------------------------PROTOTYPES------------------------------------ */
 
-/* adds a task to the system */
 void addTask(char read[]);
-void advance(char read[]);
 void addUser(char read[]);
+void addActivity(char read[]);
+void advance(char read[]);
 
 /* -----------------------------------GLOBAL VARS----------------------------------- */
 
@@ -50,9 +50,9 @@ static int amounts[3];
 static int pTask[MAX_TASK][3];
 /*stores all the tasks' descriptions */
 static char dTask[MAX_TASK][MAX_TASKL];
-/*stores the activity the tasks are currently in
- * static char aTask[MAX_TASK][MAX_ATVL]; */
+/*stores the activity the tasks are currently in */
+/*static char aTask[MAX_TASK][MAX_ATVL];*/
 /* stores the users' descriptions */
 static char user[MAX_USER][MAX_USERL];
 /* stores the activities' descriptions */
-/*static char atv[MAX_ATV][MAX_ATVL]; */
+static char atv[MAX_ATV][MAX_ATVL];
