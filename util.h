@@ -22,6 +22,7 @@
 /* max activity description length */
 #define MAX_ATVL 20
 
+#define COND (c != '\0' && c != '\n' && c != EOF)
 #define FAIL -1
 /* beginning of a timer */
 #define ZERO 0

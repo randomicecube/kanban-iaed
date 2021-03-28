@@ -13,12 +13,9 @@
 int main(){
 
 	char input[MAX_LENGTH];
-	/* c will store the command's characters */
-	char c;
 
 	/* stores the program's state - at 0 the program keeps running, at 1 it stops */
 	int state = 0;
-	int i;
 
 	strcpy(atvProp[TODO].desc, "TO DO");
 	atvProp[TODO].noTasks = 0;
@@ -30,10 +27,7 @@ int main(){
 
 	do{
 		fgets(input, MAX_LENGTH, stdin);
-		/* command character might not be the first character in the input */
-		for(i = 0; input[i] < 'a' || input[i] > 'z'; i++);
-		c = input[i];
-		switch(c){
+		switch(input[0]){
 			case 'q':
 				state = 1;
 				break;
@@ -74,7 +68,7 @@ void addTask(char read[]){
 	/* contains the currently read character from read[] */
 	char c = read[i];
 	/* temporary array containing a task's description */
-	char temp[MAX_TASKL];
+	char temp[MAX_TASKL] =  {0};
 
 	if(amTasks == MAX_TASK){
     	printf(T_TOOMANY);
@@ -93,7 +87,7 @@ void addTask(char read[]){
 		i++; /* to account for the space between <duration> and <description> */
 		c = read[i];
 
-		while(c != '\0' && c != '\n' && c != EOF && counter < MAX_TASKL){
+		while(COND && counter < MAX_TASKL){
 			temp[counter] = c;
 			counter++;
 			i++;
@@ -137,39 +131,39 @@ void addUser(char read[]){
     /* contains the currently read character from read[] */
     char c = read[i];
     /* temporary array containing a user's description */
-    char temp[MAX_USERL];
+    char temp[MAX_USERL] = {0};
 	/* while at 0, temp doesn't store characters */
 	int space = 0;
 
-        while(c != '\0' && c != '\n' && c != EOF && (c != ' ' || space == 0) && counter < MAX_TASKL){
-        	if(space == 0){
-				if(c != '0'){
-					space = 1;
-					temp[counter] = c;
-					counter++;
-					i++;
-					c = read[i];
-				}
-			}
-			else{
+    while(COND && (c != ' ' || space == 0) && counter < MAX_TASKL){
+        if(space == 0){
+			if(c != '0'){
+				space = 1;
 				temp[counter] = c;
-            	counter ++;
-        		i++;
-          		c = read[i];
+				counter++;
+				i++;
+				c = read[i];
 			}
+		}
+		else{
+			temp[counter] = c;
+            counter ++;
+        	i++;
+          	c = read[i];
+		}
 		
-        }
+    }
 
-        for(j = 0; j < amUsers && dup == 0; j++){
-        	if (strcmp(temp, userProp[j].desc) == 0){
-                	dup = 1;
-                }
-      	}
-
-        if(dup == 1){
-        	printf(U_EXISTS);
+    for(j = 0; j < amUsers && dup == 0; j++){
+        if (strcmp(temp, userProp[j].desc) == 0){
+            dup = 1;
         }
-	else if(amUsers == MAX_USER && strcmp(temp, "") != 0){
+    }
+
+    if(dup == 1){
+        printf(U_EXISTS);
+    }
+	else if(amUsers == MAX_USER){
 		printf(U_TOOMANY);
 	}
     else if(strcmp(temp, "") != 0){
@@ -193,9 +187,9 @@ void addActivity(char read[]){
     /* contains the currently read character from read[] */
     char c = read[i];
     /* temporary array containing an activity's description */
-    char temp[MAX_ATVL];
+    char temp[MAX_ATVL] = {0};
 
-    while(c != '\0' && c != '\n' && c != EOF && counter < MAX_ATVL){
+    while(COND && counter < MAX_ATVL){
 		if(!isupper(c)){
 			min = 1;
 		}
@@ -240,7 +234,7 @@ void advance(char read[]){
 	char c = read[i];
 	int neg = 0;
 
-	while(c != '\0' && c != '\n' && c != EOF && c != ' '){
+	while(COND && c != ' '){
 		if(c == '-'){
 			neg = 1;
 		}
@@ -270,19 +264,17 @@ void listTasks(char read[]){
 	int i, j = START, changed = 1, space = 0, any;
 	int idTemp = 0, idCount = 0;
 	int cap = amTasks;
-	task ordered[MAX_TASK], taskArray[MAX_TASK], tempTask;
+	task ordered[MAX_TASK] = {0}, taskArray[MAX_TASK] = {0}, tempTask;
 	char c = read[j];
 
-	while(c != '\0' && c != '\n' && c != EOF){
+	while(COND){
 		if(c >= '0' && c <= '9'){
-			printf("digits\n");
 			if(space == 1){
 				space = 0;
 			}
 			idTemp = idTemp * 10 + (c - '0');
 		}
 		else if(space == 0 && (c == '\t' || c == ' ')){
-			printf("got here ig\n");
 			space = 1;
 			any = anyId(idTemp, amTasks, taskProp);
 			if(any == FAIL){
@@ -299,10 +291,12 @@ void listTasks(char read[]){
 		c = read[j];
 	}
 
-	if(anyId(idTemp, amTasks, taskProp) == FAIL){
+	any = anyId(idTemp, amTasks, taskProp);
+	/* j > START in the condition to account for a possible initial \n or \0 or EOF */
+	if(any == FAIL && j > START){
 		printf(T_NOID, idTemp);
 	}
-	else if(isalnum(idTemp) && idTemp != 0){
+	else if(idTemp != 0){
 		taskArray[idCount] = taskProp[any];
 		idCount++;
 	}
@@ -343,7 +337,7 @@ void listTasks(char read[]){
 
 }
 
-/* checks if a given ID is an ID of any task in the system */
+/* returns -1 if the ID isn't in the system or its index in the tasks array if it is */
 int anyId(int n, int size, task v[]){
 	int i, res = FAIL;
 	for(i = 0; i < size; i++){
