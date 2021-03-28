@@ -329,7 +329,7 @@ void listTasks(char read[]){
 
 			while(changed == 1){
 				changed = 0;
-				for(i = 0; i <= cap; i++){
+				for(i = 0; i < cap - 1; i++){
 					if(strcmp(ordered[i].desc, ordered[i+1].desc) > 0){
 						tempTask = ordered[i];
 						ordered[i] = ordered[i+1];
