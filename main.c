@@ -40,6 +40,9 @@ int main(){
 			case 't':
 				addTask(input);
 				break;
+			case 'l':
+				listTasks(input);
+				break;
 			case 'n':
 				advance(input);
 				break;
@@ -96,8 +99,6 @@ void addTask(char read[]){
 			i++;
 			c = read[i];
 		}
-
-		printf("%s\n", temp);
 
 		for(j = 0; j < amTasks && dup == 0; j++){
 			if (strcmp(temp, taskProp[j].desc) == 0){
@@ -262,4 +263,91 @@ void advance(char read[]){
 	else{
 		printf(TIME_INVALID);
 	}
+}
+
+void listTasks(char read[]){
+	int i, j = START, changed = 1, space = 0;
+	int idTemp = 0, idCount = 0;
+	int idWrong = 0;
+	int cap = amTasks;
+	task ordered[MAX_TASK], taskArray[MAX_TASK], tempTask;
+	char c = read[j];
+
+	while(c != '\0' && c != '\n' && c != EOF && idWrong == 0){
+		if(space == 0 && (c == '\t' || c == ' ')){
+			space = 1;
+			idWrong = 1;
+			for(i = 0; i < amTasks && idWrong == 1; i++){
+				if (taskProp[i].id == idTemp){
+					idWrong = 0;
+					taskArray[idCount] = taskProp[i];
+					idTemp = 0;
+					idCount++;
+				}
+			}
+		}
+		else if(c >= '0' && c <= '9'){
+			if(space == 1){
+				space = 0;
+			}
+			idTemp = idTemp * 10 + (c - '0');
+		}
+
+		j++;
+		c = read[j];
+
+	}
+
+	idWrong = 1;
+	for(i = 0; i < amTasks && idWrong == 1; i++){
+		if (taskProp[i].id == idTemp){
+			idWrong = 0;
+			taskArray[idCount] = taskProp[i];
+			idTemp = 0;
+			idCount++;
+		}
+	}
+
+	if(idWrong == 1 && idTemp != 0){
+		printf(T_NOID, idTemp);
+	}
+
+	else{
+		if(idCount > 0){
+			for(i = 0; i < idCount; i++){
+				printf("%d %s #%d %s\n", \
+						taskArray[i].id, \
+						taskArray[i].currAtv, \
+						taskArray[i].pd, \
+						taskArray[i].desc \
+						);
+			}
+		}
+
+		else{
+			memcpy(ordered, taskProp, sizeof(taskProp));
+
+			while(changed == 1){
+				changed = 0;
+				for(i = 0; i <= cap; i++){
+					if(strcmp(ordered[i].desc, ordered[i+1].desc) > 0){
+						tempTask = ordered[i];
+						ordered[i] = ordered[i+1];
+						ordered[i+1] = tempTask;
+						changed = 1;
+					}
+				}
+				cap--;
+			}
+			for(i = 0; i < amTasks; i++){
+				printf("%d %s #%d %s\n", \
+						ordered[i].id, \
+						ordered[i].currAtv, \
+						ordered[i].pd, \
+						ordered[i].desc \
+						);
+			}	
+		}
+	}
+
 }

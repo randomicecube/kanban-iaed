@@ -37,6 +37,7 @@
 #define T_TOOMANY "too many tasks\n"
 #define T_EXISTS "duplicate description\n"
 #define T_WRITEID "task %d\n"
+#define T_NOID "%d: no such task\n"
 /* user-related printf macros */
 #define U_TOOMANY "too many users\n"
 #define U_EXISTS "user already exists\n"
@@ -58,6 +59,8 @@ void addUser(char read[]);
 void addActivity(char read[]);
 /* advances the system's time - 'n' command*/
 void advance(char read[]);
+/* lists all the tasks/a specific subset of tasks in the system - 'l' command */
+void listTasks(char read[]);
 
 /* -------------------------------------STRUCTS------------------------------------- */
 
