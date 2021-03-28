@@ -17,16 +17,19 @@ int main(){
 	/* stores the program's state - at 0 the program keeps running, at 1 it stops */
 	int state = 0;
 
+	/* starting the 3 initial activities */
 	strcpy(atvProp[TODO].desc, "TO DO");
 	atvProp[TODO].noTasks = 0;
 	strcpy(atvProp[INPROGRESS].desc, "IN PROGRESS");
 	atvProp[INPROGRESS].noTasks = 0;
 	strcpy(atvProp[DONE].desc, "DONE");
 	atvProp[DONE].noTasks = 0;
+	/* updating the activity count */
 	amAtvs += 3;
 
 	do{
 		fgets(input, MAX_LENGTH, stdin);
+		/* input[0] was used since the command character is always the first character */
 		switch(input[0]){
 			case 'q':
 				state = 1;
@@ -70,12 +73,13 @@ void addTask(char read[]){
 	/* temporary array containing a task's description */
 	char temp[MAX_TASKL] =  {0};
 
+	/* the system cannot accept more tasks */
 	if(amTasks == MAX_TASK){
     	printf(T_TOOMANY);
 	}
 	
 	else{
-
+		/* reading the predicted duration */
 		while(c != ' ' && c != '\t'){
 			if(c >= '0' && c <= '9'){
 		 		pd = pd * 10 + (c - '0');
@@ -87,32 +91,37 @@ void addTask(char read[]){
 		i++; /* to account for the space between <duration> and <description> */
 		c = read[i];
 
+		/* reading the task's description */
 		while(COND && counter < MAX_TASKL){
+			/* the temp string is used because the description might be invalid */
 			temp[counter] = c;
 			counter++;
 			i++;
 			c = read[i];
 		}
 
+		/* check if the description already exists in the system */
 		for(j = 0; j < amTasks && dup == 0; j++){
 			if (strcmp(temp, taskProp[j].desc) == 0){
 				dup = 1;
 			}
 		}
 
+		/* happens if the description exists in the system */
 		if(dup == 1){
 			printf(T_EXISTS);
 		}
 
+		/* if the description is valid */
 		else{
-			/* id always 1 ahead of taskProp's index */
+			/* copying the input's information + current time into the task array */
 			strcpy(taskProp[amTasks].desc, temp);
 			taskProp[amTasks].pd = pd;
 			taskProp[amTasks].st = currentTime;
 			/* id always 1 ahead of amTasks */
 			taskProp[amTasks].id = amTasks + 1;
 
-			/* the task always starts in the TO DO activity */
+			/* tasks always start in the TO DO activity */
 			strcpy(taskProp[amTasks].currAtv, atvProp[TODO].desc);
 			atvProp[TODO].noTasks++;
 
@@ -135,41 +144,48 @@ void addUser(char read[]){
 	/* while at 0, temp doesn't store characters */
 	int space = 0;
 
-    while(COND && (c != ' ' || space == 0) && counter < MAX_TASKL){
+    while(COND && (c != ' ' || space == 0) && counter < MAX_USERL){
+		/* happens if the name hasn't started being written yet */
         if(space == 0){
-			if(c != '0'){
+			/* isalpha() being true means we can starting writing the name */
+			if(isalpha(c)){
 				space = 1;
 				temp[counter] = c;
 				counter++;
-				i++;
-				c = read[i];
 			}
 		}
+		/* if the name is being written */
 		else{
 			temp[counter] = c;
             counter ++;
-        	i++;
-          	c = read[i];
 		}
+
+		i++;
+		c = read[i];
 		
     }
 
+	/* checks if the name is already in the system */
     for(j = 0; j < amUsers && dup == 0; j++){
         if (strcmp(temp, userProp[j].desc) == 0){
             dup = 1;
         }
     }
 
+	/* happens if the name is already in the system */
     if(dup == 1){
         printf(U_EXISTS);
     }
+	/* happens if the system can't accept more users */
 	else if(amUsers == MAX_USER){
 		printf(U_TOOMANY);
 	}
+	/* happens if the system is adding a user */
     else if(strcmp(temp, "") != 0){
     	strcpy(userProp[amUsers].desc, temp);
         amUsers++;
  	}
+	 /* happens if the request is to print all usernames */
 	else{
 		for(j = 0; j < amUsers; j++){
 			printf("%s\n", userProp[j].desc);
@@ -190,6 +206,7 @@ void addActivity(char read[]){
     char temp[MAX_ATVL] = {0};
 
     while(COND && counter < MAX_ATVL){
+		/* checks if the activity is writen correctly - all uppercase */
 		if(!isupper(c)){
 			min = 1;
 		}
@@ -199,25 +216,31 @@ void addActivity(char read[]){
         c = read[i];
     }
 
+	/* checks if the description is already in the system */
     for(j = 0; j < amAtvs && dup == 0; j++){
     	if (strcmp(temp, atvProp[j].desc) == 0){
         	dup = 1;
         }
     }
 
+	/* happens if the description is already in the system */
     if(dup == 1){
     	printf(A_EXISTS);
     }
+	/* happens if the description was written wrongly - including lowercase characters */
 	else if(min == 1){
 		printf(A_INVALID);
 	}
+	/* happens if the system can't accept more activities */
     else if(amAtvs == MAX_ATV && strcmp(temp, "") != 0){
     	printf(A_TOOMANY);
     }
+	/* happens if the request is to add an activity */
     else if(strcmp(temp, "") != 0){
     	strcpy(atvProp[amAtvs].desc, temp);
         amAtvs++;
     }
+	/* happens if the request is to list all activities */
     else{
     	for(j = 0; j < amAtvs; j++){
         	printf("%s\n", atvProp[j].desc);
@@ -232,11 +255,13 @@ void advance(char read[]){
 	int i = START;
 	int time = 0;
 	char c = read[i];
-	int neg = 0;
+	/* if at 0, the input is considered correct; if at 1, it's not a non negative decimal */
+	int wrong = 0;
 
 	while(COND && c != ' '){
-		if(c == '-'){
-			neg = 1;
+		/* checks if a representation of negative/float/double notation was used */
+		if(c == '-' || c == '.' || c == ','){
+			wrong = 1;
 		}
 		else{
 			if(c >= '0' && c <= '9'){
@@ -247,13 +272,15 @@ void advance(char read[]){
 		}
 	}
 
-	if(neg != 1){
+	/* happens if the time isn't invalid */
+	if(wrong != 1){
 		if(time != 0){
 			currentTime += time;
 		}
 
 		printf("%d\n", currentTime);
 	}
+	/* happens if the time is invalid */
 	else{
 		printf(TIME_INVALID);
 	}
@@ -261,22 +288,38 @@ void advance(char read[]){
 
 /* lists all the tasks/a specific subset of tasks in the system - 'l' command */
 void listTasks(char read[]){
-	int i, j = START, changed = 1, space = 0, any;
-	int idTemp = 0, idCount = 0;
+	int i, j = START;
+	/* at 0, the system reads ID's; at 1, recognizes it as a space or tab */ 
+	int space = 0;
+	/* used with the anyID function; at FAIL, no matching id; otherwise, contains the id */
+	int any;
+	/* contains a temporary value of an ID  */
+	int idTemp = 0;
+	/* how many ID's have been counted from the input stream */
+	int idCount = 0;
+	/* used in the sorting algorithm - 1 if there were changes made, 0 if not */ 
+	int changed = 1;
+	/* used in the sorting algorihtm, how many "passes" the loop has to do */
 	int cap = amTasks;
-	task ordered[MAX_TASK] = {0}, taskArray[MAX_TASK] = {0}, tempTask;
+	/* contain an ordered subset of tasks and a general subset of tasks, respectively */
+	task ordered[MAX_TASK] = {0}, taskArray[MAX_TASK] = {0};
+	task tempTask;
 	char c = read[j];
 
 	while(COND){
+		/* happens if the character being read is a digit */
 		if(c >= '0' && c <= '9'){
+			/* if the last character was a space/tab */
 			if(space == 1){
 				space = 0;
 			}
 			idTemp = idTemp * 10 + (c - '0');
 		}
+		/* if the last character was a digit and the current is a space/tab */
 		else if(space == 0 && (c == '\t' || c == ' ')){
 			space = 1;
 			any = anyId(idTemp, amTasks, taskProp);
+			/* if the ID doesn't exist in the system */
 			if(any == FAIL){
 				printf(T_NOID, idTemp);
 			}
@@ -296,13 +339,15 @@ void listTasks(char read[]){
 	if(any == FAIL && j > START){
 		printf(T_NOID, idTemp);
 	}
+	/* adds the last ID (validity checked above) */
 	else if(idTemp != 0){
 		taskArray[idCount] = taskProp[any];
 		idCount++;
 	}
 
+	/* idCount > 0 -> list the tasks, sorted by their ID */
 	if(idCount > 0){
-		for(i = 0; i < idCount; i++){
+		for(i = 0; i < amTasks; i++){
 			printf("%d %s #%d %s\n",taskArray[i].id, \
 									taskArray[i].currAtv, \
 									taskArray[i].pd, \
@@ -311,8 +356,10 @@ void listTasks(char read[]){
 		}
 	}
 
+	/* idCount == 0 -> list the tasks, sorted alphabetically by their descriptions */
 	else{
 		memcpy(ordered, taskProp, sizeof(taskProp));
+		/* bubble sort */
 		while(changed == 1){
 			changed = 0;
 			for(i = 0; i < cap - 1; i++){
@@ -347,5 +394,3 @@ int anyId(int n, int size, task v[]){
 	}
 	return res;
 }
-
-/************ TINGS WRONG WITH L COMMAND FFS *******/

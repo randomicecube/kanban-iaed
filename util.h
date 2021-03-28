@@ -1,7 +1,7 @@
 /*
  * File: util.h
  * Author: Diogo Gaspar, 99207, LEIC-A
- * Description: Program's constants, general prototypes and variables, structs.
+ * Description: Program's constants, prototypes, variables, structs.
  */
 
 /* -------------------------------------MACROS-------------------------------------- */
@@ -22,9 +22,11 @@
 /* max activity description length */
 #define MAX_ATVL 20
 
+/* condition to stop reading input - the user is done writing */
 #define COND (c != '\0' && c != '\n' && c != EOF)
+/* used in some functions to indicate that the search has failed - no matches */
 #define FAIL -1
-/* beginning of a timer */
+/* beginning of the timer */
 #define ZERO 0
 /* TO DO index */
 #define TODO 0
