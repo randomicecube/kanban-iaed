@@ -13,14 +13,27 @@
 int main(){
 
 	char input[MAX_LENGTH];
+	/* c will store the command's characters */
+	char c;
 
-	strcpy(atv[0], "TO DO");
-	strcpy(atv[1], "IN PROGRESS");
-	strcpy(atv[2], "DONE");
+	/* stores the program's state - at 0 the program keeps running, at 1 it stops */
+	int state = 0;
+	int i;
+
+	strcpy(atvProp[TODO].desc, "TO DO");
+	atvProp[TODO].noTasks = 0;
+	strcpy(atvProp[INPROGRESS].desc, "IN PROGRESS");
+	atvProp[INPROGRESS].noTasks = 0;
+	strcpy(atvProp[DONE].desc, "DONE");
+	atvProp[DONE].noTasks = 0;
+	amAtvs += 3;
 
 	do{
 		fgets(input, MAX_LENGTH, stdin);
-		switch(input[0]){
+		/* command character might not be the first character in the input */
+		for(i = 0; input[i] < 'a' || input[i] > 'z'; i++);
+		c = input[i];
+		switch(c){
 			case 'q':
 				state = 1;
 				break;
@@ -60,8 +73,8 @@ void addTask(char read[]){
 	/* temporary array containing a task's description */
 	char temp[MAX_TASKL];
 
-	if(amounts[0] == MAX_TASK){
-    	printf("too many tasks\n");
+	if(amTasks == MAX_TASK){
+    	printf(T_TOOMANY);
 	}
 	
 	else{
@@ -79,89 +92,98 @@ void addTask(char read[]){
 
 		while(c != '\0' && c != '\n' && c != EOF && counter < MAX_TASKL){
 			temp[counter] = c;
-			counter ++;
+			counter++;
 			i++;
 			c = read[i];
 		}
 
-		for(j = 0; j < amounts[0] && dup == 0; j++){
-			if (strcmp(temp, dTask[j]) == 0){
+		printf("%s\n", temp);
+
+		for(j = 0; j < amTasks && dup == 0; j++){
+			if (strcmp(temp, taskProp[j].desc) == 0){
 				dup = 1;
 			}
 		}
 
 		if(dup == 1){
-			printf("duplicate description\n");
+			printf(T_EXISTS);
 		}
 
 		else{
-			strcpy(dTask[amounts[0]], temp);
-			pTask[amounts[0]][0] = pd;
-			pTask[amounts[0]][1] = currentTime;
-			pTask[amounts[0]][2] = amounts[0] + 1; /* id always 1 ahead of index */
-			printf("task %d\n", pTask[amounts[0]][2]);
-			amounts[0]++;
+			/* id always 1 ahead of taskProp's index */
+			strcpy(taskProp[amTasks].desc, temp);
+			taskProp[amTasks].pd = pd;
+			taskProp[amTasks].st = currentTime;
+			/* id always 1 ahead of amTasks */
+			taskProp[amTasks].id = amTasks + 1;
+
+			/* the task always starts in the TO DO activity */
+			strcpy(taskProp[amTasks].currAtv, atvProp[TODO].desc);
+			atvProp[TODO].noTasks++;
+
+			printf(T_WRITEID, taskProp[amTasks].id);
+			amTasks++;
 		}	
 	}
 }
 
-/* adds a user to the system - 'u' command*/
+/* adds a user to the system/lists all users by creation date - 'u' command */
 void addUser(char read[]){
 	int counter = 0, j;
 	int i = START;
-        /* 0 if there's no duplicate description found, 1 if there is */
-        int dup = 0;
-        /* contains the currently read character from read[] */
-        char c = read[i];
-        /* temporary array containing a user's description */
-        char temp[MAX_TASKL];
+    /* 0 if there's no duplicate description found, 1 if there is */
+    int dup = 0;
+    /* contains the currently read character from read[] */
+    char c = read[i];
+    /* temporary array containing a user's description */
+    char temp[MAX_USERL];
 	/* while at 0, temp doesn't store characters */
 	int space = 0;
 
         while(c != '\0' && c != '\n' && c != EOF && (c != ' ' || space == 0) && counter < MAX_TASKL){
         	if(space == 0){
-			if(c != '0'){
-				space = 1;
-				temp[counter] = c;
-				counter++;
-				i++;
-				c = read[i];
+				if(c != '0'){
+					space = 1;
+					temp[counter] = c;
+					counter++;
+					i++;
+					c = read[i];
+				}
 			}
-		}
-		else{
-			temp[counter] = c;
-                	counter ++;
-                	i++;
-                	c = read[i];
-		}
+			else{
+				temp[counter] = c;
+            	counter ++;
+        		i++;
+          		c = read[i];
+			}
 		
         }
 
-        for(j = 0; j < amounts[1] && dup == 0; j++){
-        	if (strcmp(temp, user[j]) == 0){
+        for(j = 0; j < amUsers && dup == 0; j++){
+        	if (strcmp(temp, userProp[j].desc) == 0){
                 	dup = 1;
                 }
       	}
 
         if(dup == 1){
-        	printf("user already exists\n");
+        	printf(U_EXISTS);
         }
-	else if(amounts[1] == MAX_USER && strcmp(temp, "") != 0){
-		printf("too many users\n");
+	else if(amUsers == MAX_USER && strcmp(temp, "") != 0){
+		printf(U_TOOMANY);
 	}
     else if(strcmp(temp, "") != 0){
-    	strcpy(user[amounts[1]], temp);
-        amounts[1]++;
+    	strcpy(userProp[amUsers].desc, temp);
+        amUsers++;
  	}
 	else{
-		for(j = 0; j < amounts[1]; j++){
-			printf("%s\n", user[j]);
+		for(j = 0; j < amUsers; j++){
+			printf("%s\n", userProp[j].desc);
 		}
 	}
 }
 
 
-/* adds an activity to the system - 'a' command */
+/* adds an activity to the system/lists all activities by creation date - 'a' command */
 void addActivity(char read[]){
 	int counter = 0, j, min = 0;
     int i = START;
@@ -170,7 +192,7 @@ void addActivity(char read[]){
     /* contains the currently read character from read[] */
     char c = read[i];
     /* temporary array containing an activity's description */
-    char temp[MAX_TASKL];
+    char temp[MAX_ATVL];
 
     while(c != '\0' && c != '\n' && c != EOF && counter < MAX_ATVL){
 		if(c >= 'a' && c <= 'z'){
@@ -182,28 +204,28 @@ void addActivity(char read[]){
         c = read[i];
     }
 
-    for(j = 0; j < amounts[2] && dup == 0; j++){
-    	if (strcmp(temp, atv[j]) == 0){
+    for(j = 0; j < amAtvs && dup == 0; j++){
+    	if (strcmp(temp, atvProp[j].desc) == 0){
         	dup = 1;
         }
     }
 
     if(dup == 1){
-    	printf("duplicate activity\n");
+    	printf(A_EXISTS);
     }
 	else if(min == 1){
-		printf("invalid description\n");
+		printf(A_INVALID);
 	}
-    else if(amounts[2] == MAX_ATV && strcmp(temp, "") != 0){
-    	printf("too many activities\n");
+    else if(amAtvs == MAX_ATV && strcmp(temp, "") != 0){
+    	printf(A_TOOMANY);
     }
     else if(strcmp(temp, "") != 0){
-    	strcpy(atv[amounts[2]], temp);
-        amounts[2]++;
+    	strcpy(atvProp[amAtvs].desc, temp);
+        amAtvs++;
     }
     else{
-    	for(j = 0; j < amounts[2]; j++){
-        	printf("%s\n", atv[j]);
+    	for(j = 0; j < amAtvs; j++){
+        	printf("%s\n", atvProp[j].desc);
         }
     }
 
@@ -217,7 +239,7 @@ void advance(char read[]){
 	char c = read[i];
 	int neg = 0;
 
-	while(c != '\0' && c != '\n' && c != ' ' && c != EOF && state == 0){
+	while(c != '\0' && c != '\n' && c != ' ' && c != EOF){
 		if(c == '-'){
 			neg = 1;
 		}
@@ -238,6 +260,6 @@ void advance(char read[]){
 		printf("%d\n", currentTime);
 	}
 	else{
-		printf("invalid time\n");
+		printf(TIME_INVALID);
 	}
 }
