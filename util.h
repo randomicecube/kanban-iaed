@@ -22,6 +22,7 @@
 /* max activity description length */
 #define MAX_ATVL 20
 
+#define FAIL -1
 /* beginning of a timer */
 #define ZERO 0
 /* TO DO index */
@@ -47,20 +48,6 @@
 #define A_INVALID "invalid description\n"
 /* time-related printf macros */
 #define TIME_INVALID "invalid time \n"
-
-
-/* -----------------------------------PROTOTYPES------------------------------------ */
-
-/* adds a task to the system - 't' command */
-void addTask(char read[]);
-/* adds a user to the system/lists all users by creation date - 'u' command */
-void addUser(char read[]);
-/* adds an activity to the system/lists all activities by creation date - 'a' command */
-void addActivity(char read[]);
-/* advances the system's time - 'n' command*/
-void advance(char read[]);
-/* lists all the tasks/a specific subset of tasks in the system - 'l' command */
-void listTasks(char read[]);
 
 /* -------------------------------------STRUCTS------------------------------------- */
 
@@ -90,6 +77,21 @@ typedef struct activity{
     /* how many tasks are currently in the activity's scope */
     int noTasks;
 }atv;
+
+/* -----------------------------------PROTOTYPES------------------------------------ */
+
+/* adds a task to the system - 't' command */
+void addTask(char read[]);
+/* adds a user to the system/lists all users by creation date - 'u' command */
+void addUser(char read[]);
+/* adds an activity to the system/lists all activities by creation date - 'a' command */
+void addActivity(char read[]);
+/* advances the system's time - 'n' command*/
+void advance(char read[]);
+/* lists all the tasks/a specific subset of tasks in the system - 'l' command */
+void listTasks(char read[]);
+/* checks if a given ID is an ID of any task in the system */
+int anyId(int n, int size, task v[]);
 
 /* -----------------------------------GLOBAL VARS----------------------------------- */
 
