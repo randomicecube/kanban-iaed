@@ -77,8 +77,6 @@ typedef struct task{
 typedef struct user{
     /* stores the user's description */
     char desc[MAX_USERL];
-    /* stores the user's current task */
-    task current;
 }user;
 
 /* struct representing an instance of an activity, including its properties */

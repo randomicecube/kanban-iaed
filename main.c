@@ -87,11 +87,11 @@ void addTask(char read[]){
 	
 	else{
 		/* reading the predicted duration */
-		while(reading == 0 || (c != ' ' && c != '\t')){
-			if(reading == 0 && (c != ' ' && c != '\t')){
+		while(reading == 0 || !isspace(c)){
+			if(reading == 0 && !isspace(c)){
 				reading = 1;
 			}
-			if(c >= '0' && c <= '9'){
+			if(isdigit((int) c)){
 		 		pd = pd * 10 + (c - '0');
 			}
 			i++;
@@ -168,7 +168,7 @@ void addUser(char read[]){
 			}
 		}
 		/* the name is being written but we found a space/tab */
-		else if(space == 1 && c == ' '){
+		else if(space == 1 && isspace(c)){
 			space = 2;
 		}
 		/* if the name is already being written */
@@ -276,13 +276,13 @@ void advance(char read[]){
 	/* if at 0, the input is considered correct; if at 1, it's not a non negative decimal */
 	int wrong = 0;
 
-	while(COND && c != ' '){
+	while(COND && !isspace(c)){
 		/* checks if a representation of negative/float/double notation was used */
-		if(c == '-' || c == '.' || c == ','){
+		if(c == '-' || c == '.'){
 			wrong = 1;
 		}
 		else{
-			if(c >= '0' && c <= '9'){
+			if(isdigit((int) c)){
 				time = time * 10 + (c - '0');
 				i++;
 				c = read[i];
@@ -327,7 +327,7 @@ void listTasks(char read[]){
 
 	while(COND){
 		/* happens if the character being read is a digit */
-		if(c >= '0' && c <= '9'){
+		if(isdigit((int) c)){
 			/* if the last character was a space/tab */
 			if(space == 1){
 				space = 0;
@@ -335,7 +335,7 @@ void listTasks(char read[]){
 			idTemp = idTemp * 10 + (c - '0');
 		}
 		/* if the last character was a digit and the current is a space/tab */
-		else if(space == 0 && (c == '\t' || c == ' ')){
+		else if(space == 0 && isspace(c)){
 			space = 1;
 			any = anyId(idTemp, amTasks, taskProp);
 			/* if the ID doesn't exist in the system */
@@ -474,7 +474,7 @@ void moveTasks(char read[]){
 	char c = read[i], username[MAX_USERL], atvDesc[MAX_ATVL];
 	task actualTask;
 	atv actualAtv;
-	while(reading == 0 || (c != ' ' && c != '\t')){
+	while(reading == 0 || !isspace(c)){
 		if(isdigit((int) c) && reading == 0){
 			reading = 1;
 		}
@@ -499,7 +499,7 @@ void moveTasks(char read[]){
 	c = read[i];
 
 	reading = 0, j = 0;
-	while(reading == 0 || (c != ' ' && c != '\t')){
+	while(reading == 0 || !isspace(c)){
 		if(isalpha(c) && reading == 0){
 			reading = 1;
 		}
