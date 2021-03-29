@@ -144,17 +144,21 @@ void addUser(char read[]){
 	/* while at 0, temp doesn't store characters */
 	int space = 0;
 
-    while(COND && (c != ' ' || space == 0) && counter < MAX_USERL){
-		/* happens if the name hasn't started being written yet */
+    while(COND && (space == 0 || space == 1) && counter < MAX_USERL){
+		/* if the name hasn't started being written yet */
         if(space == 0){
-			/* isalpha() being true means we can starting writing the name */
+			/* isalpha(c) being true means we can start writing the name */
 			if(isalpha(c)){
 				space = 1;
 				temp[counter] = c;
 				counter++;
 			}
 		}
-		/* if the name is being written */
+		/* the name is being written but we found a space/tab */
+		else if(space == 1 && c == ' '){
+			space = 2;
+		}
+		/* if the name is already being written */
 		else{
 			temp[counter] = c;
             counter ++;
@@ -347,7 +351,7 @@ void listTasks(char read[]){
 
 	/* idCount > 0 -> list the tasks, sorted by their ID */
 	if(idCount > 0){
-		for(i = 0; i < amTasks; i++){
+		for(i = 0; i < idCount; i++){
 			printf("%d %s #%d %s\n",taskArray[i].id, \
 									taskArray[i].currAtv, \
 									taskArray[i].pd, \
