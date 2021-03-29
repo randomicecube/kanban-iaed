@@ -43,6 +43,9 @@ int main(){
 			case 'n':
 				advance(input);
 				break;
+			case 'd':
+				listAtvTasks(input);
+				break;
 			case 'u':
 				addUser(input);
 				break;
@@ -123,6 +126,7 @@ void addTask(char read[]){
 
 			/* tasks always start in the TO DO activity */
 			strcpy(taskProp[amTasks].currAtv, atvProp[TODO].desc);
+			atvProp[TODO].Tasks[atvProp[TODO].noTasks] = taskProp[amTasks];
 			atvProp[TODO].noTasks++;
 
 			printf(T_WRITEID, taskProp[amTasks].id);
@@ -387,6 +391,86 @@ void listTasks(char read[]){
 	}
 
 }
+
+/************************ WIP - M COMMAND *****************************/
+
+void listAtvTasks(char read[]){
+
+	int i = START, j = 0, found = 0, changed = 1;
+	int cap;
+	char c = read[i];
+	char activity[MAX_ATVL];
+	task tempTask;
+	atv wanted, ordered;
+	
+	while(COND){
+		activity[j] = c;
+		i++;
+		j++;
+		c = read[i];
+	}
+
+	printf("activity: %s\n", activity);
+
+	for(j = 0; j < amAtvs && found == 0; j++){
+		if(!strcmp(atvProp[j].desc, activity)){
+			found = 1;
+			wanted = atvProp[j];
+		}
+	}
+
+	if(found == 0){
+		printf(A_NOTFOUND);
+	}
+
+	else{
+		cap = wanted.noTasks;
+		ordered = wanted;
+		/* bubble sort */
+		while(changed == 1){
+			changed = 0;
+			for(j = 0; j < cap - 1; j++){
+				if(ordered.Tasks[j].st > ordered.Tasks[j + 1].st){
+					tempTask = ordered.Tasks[j];
+					ordered.Tasks[j] = ordered.Tasks[j + 1];
+					ordered.Tasks[j + 1] = tempTask;
+					changed = 1;
+				}
+				else if(wanted.Tasks[j].st == ordered.Tasks[j + 1].st){
+					if(strcmp(ordered.Tasks[j].desc, ordered.Tasks[j + 1].desc) > 0){
+						tempTask = ordered.Tasks[j];
+						ordered.Tasks[j] = ordered.Tasks[j + 1];
+						ordered.Tasks[j + 1] = tempTask;
+						changed = 1;
+					}
+				}
+			}
+			cap--;
+		}
+
+		for(j = 0; j < ordered.noTasks; j++){
+			printf("%d %d %s\n", \
+					ordered.Tasks[j].id, \
+					ordered.Tasks[j].st, \
+					ordered.Tasks[j].desc \
+			);
+		}
+
+	}
+
+
+
+
+}
+
+
+
+
+
+
+
+
+/**********************************************************************/
 
 /* returns -1 if the ID isn't in the system or its index in the tasks array if it is */
 int anyId(int n, int size, task v[]){

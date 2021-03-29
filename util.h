@@ -49,6 +49,7 @@
 #define A_TOOMANY "too many activities\n"
 #define A_EXISTS "duplicate activity\n"
 #define A_INVALID "invalid description\n"
+#define A_NOTFOUND "no such activity\n"
 /* time-related printf macros */
 #define TIME_INVALID "invalid time \n"
 
@@ -79,6 +80,8 @@ typedef struct activity{
     char desc[MAX_ATVL];
     /* how many tasks are currently in the activity's scope */
     int noTasks;
+    /* descriptions of the tasks currently in the activity's scope */
+    task Tasks[MAX_TASK];
 }atv;
 
 /* -----------------------------------PROTOTYPES------------------------------------ */
@@ -93,6 +96,8 @@ void addActivity(char read[]);
 void advance(char read[]);
 /* lists all the tasks/a specific subset of tasks in the system - 'l' command */
 void listTasks(char read[]);
+/* lists all the tasks currently in a given activity */
+void listAtvTasks(char read[]);
 /* checks if a given ID is an ID of any task in the system */
 int anyId(int n, int size, task v[]);
 
