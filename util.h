@@ -42,9 +42,11 @@
 #define T_EXISTS "duplicate description\n"
 #define T_WRITEID "task %d\n"
 #define T_NOID "%d: no such task\n"
+#define T_STARTED "task already started\n"
 /* user-related printf macros */
 #define U_TOOMANY "too many users\n"
 #define U_EXISTS "user already exists\n"
+#define U_NOTFOUND "no such user\n"
 /* activity-related printf macros */
 #define A_TOOMANY "too many activities\n"
 #define A_EXISTS "duplicate activity\n"
@@ -53,14 +55,19 @@
 /* time-related printf macros */
 #define TIME_INVALID "invalid time \n"
 
+#define S_TODO "TO DO"
+#define S_INPROGRESS "IN PROGRESS"
+#define S_DONE "DONE"
+
 /* -------------------------------------STRUCTS------------------------------------- */
 
 /* struct representing an instance of a task, including its properties */
 typedef struct task{
-    /* variables storing the task's predicted duration, starting time and id, respectively */
+    /* variables storing the task's predicted duration, starting time, id and actual duration */
     int pd;
     int st;
     int id;
+    int duration;
     /* stores the task's description */
     char desc[MAX_TASKL];
     char currAtv[MAX_ATVL];
@@ -100,6 +107,7 @@ void listTasks(char read[]);
 void listAtvTasks(char read[]);
 /* checks if a given ID is an ID of any task in the system */
 int anyId(int n, int size, task v[]);
+void moveTasks(char read[]);
 
 /* -----------------------------------GLOBAL VARS----------------------------------- */
 

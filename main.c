@@ -18,11 +18,11 @@ int main(){
 	int state = 0;
 
 	/* starting the 3 initial activities */
-	strcpy(atvProp[TODO].desc, "TO DO");
+	strcpy(atvProp[TODO].desc, S_TODO);
 	atvProp[TODO].noTasks = 0;
-	strcpy(atvProp[INPROGRESS].desc, "IN PROGRESS");
+	strcpy(atvProp[INPROGRESS].desc, S_INPROGRESS);
 	atvProp[INPROGRESS].noTasks = 0;
-	strcpy(atvProp[DONE].desc, "DONE");
+	strcpy(atvProp[DONE].desc, S_DONE);
 	atvProp[DONE].noTasks = 0;
 	/* updating the activity count */
 	amAtvs += 3;
@@ -42,6 +42,9 @@ int main(){
 				break;
 			case 'n':
 				advance(input);
+				break;
+			case 'm':
+				moveTasks(input);
 				break;
 			case 'd':
 				listAtvTasks(input);
@@ -75,6 +78,7 @@ void addTask(char read[]){
 	char c = read[i];
 	/* temporary array containing a task's description */
 	char temp[MAX_TASKL] =  {0};
+	int reading = 0;
 
 	/* the system cannot accept more tasks */
 	if(amTasks == MAX_TASK){
@@ -83,7 +87,10 @@ void addTask(char read[]){
 	
 	else{
 		/* reading the predicted duration */
-		while(c != ' ' && c != '\t'){
+		while(reading == 0 || (c != ' ' && c != '\t')){
+			if(reading == 0 && (c != ' ' && c != '\t')){
+				reading = 1;
+			}
 			if(c >= '0' && c <= '9'){
 		 		pd = pd * 10 + (c - '0');
 			}
@@ -121,6 +128,7 @@ void addTask(char read[]){
 			strcpy(taskProp[amTasks].desc, temp);
 			taskProp[amTasks].pd = pd;
 			taskProp[amTasks].st = currentTime;
+			taskProp[amTasks].duration = 0;
 			/* id always 1 ahead of amTasks */
 			taskProp[amTasks].id = amTasks + 1;
 
@@ -133,6 +141,7 @@ void addTask(char read[]){
 			amTasks++;
 		}	
 	}
+	return;
 }
 
 /* adds a user to the system/lists all users by creation date - 'u' command */
@@ -199,6 +208,7 @@ void addUser(char read[]){
 			printf("%s\n", userProp[j].desc);
 		}
 	}
+	return;
 }
 
 
@@ -254,7 +264,7 @@ void addActivity(char read[]){
         	printf("%s\n", atvProp[j].desc);
         }
     }
-
+	return;
 }
 
 /* advances the system's time - 'n' command*/
@@ -292,6 +302,7 @@ void advance(char read[]){
 	else{
 		printf(TIME_INVALID);
 	}
+	return;
 }
 
 /* lists all the tasks/a specific subset of tasks in the system - 'l' command */
@@ -389,10 +400,8 @@ void listTasks(char read[]){
 					);
 		}
 	}
-
+	return;
 }
-
-/************************ WIP - M COMMAND *****************************/
 
 void listAtvTasks(char read[]){
 
@@ -455,22 +464,96 @@ void listAtvTasks(char read[]){
 					ordered.Tasks[j].desc \
 			);
 		}
-
 	}
-
-
-
-
+	return;
 }
 
+void moveTasks(char read[]){
+	int i = START, j, reading = 0, idTemp = 0, foundId = 0, foundUser = 0, foundAtv = 0;
+	int slack = 0, erro = 0;
+	char c = read[i], username[MAX_USERL], atvDesc[MAX_ATVL];
+	task actualTask;
+	atv actualAtv;
+	while(reading == 0 || (c != ' ' && c != '\t')){
+		if(isdigit((int) c) && reading == 0){
+			reading = 1;
+		}
+		if(reading == 1){
+			idTemp = idTemp*10 + c - '0';
+		}
+		i++;
+		c=read[i];
+	}
+	for(j = 0; j < amTasks && foundId == 0; j++){
+		if(taskProp[j].id == idTemp){
+			actualTask = taskProp[j];
+			foundId = 1;
+		}
+	}
+	if(foundId == 0){
+		printf(T_NOID, idTemp);
+		erro = 1;
+	}
 
+	i++;
+	c = read[i];
 
+	reading = 0, j = 0;
+	while(reading == 0 || (c != ' ' && c != '\t')){
+		if(isalpha(c) && reading == 0){
+			reading = 1;
+		}
+		if(reading == 1){
+			username[j] = c;
+			j++;
+		}
+		i++;
+		c=read[i];
+	}
 
+	for(j = 0; j < amUsers && foundUser == 0; j++){
+		if(strcmp(userProp[j].desc, username) == 0){
+			foundUser = 1;
+		}
+	}
 
+	i++;
+	c = read[i];
 
+	reading = 0, j = 0;
+	while(COND){
+		atvDesc[j] = c;
+		j++;
+		i++;
+		c = read[i];
+	}
 
-
-/**********************************************************************/
+	for(j = 0; j < amAtvs && foundAtv == 0; j++){
+		if(strcmp(atvProp[j].desc, atvDesc) == 0){
+			actualAtv = atvProp[j];
+			foundAtv = 1;
+		}
+	}
+	if(erro == 0){
+		if(atvDesc == TODO){
+			printf(T_STARTED);
+		}
+		else if(foundUser == 0){
+			printf(U_NOTFOUND);
+		}
+		else if(foundAtv == 0){
+			printf(A_NOTFOUND);
+		}
+		else{
+			actualTask.duration = currentTime - actualTask.st;
+			if(strcmp(actualAtv.desc, S_DONE) == 0){
+				slack = actualTask.duration - actualTask.pd;
+				printf("duration=%d slack=%d\n", actualTask.duration, slack);
+			}
+		}
+	}
+	return;
+}
 
 /* returns -1 if the ID isn't in the system or its index in the tasks array if it is */
 int anyId(int n, int size, task v[]){
