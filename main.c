@@ -127,7 +127,7 @@ void addTask(char read[]){
 			/* copying the input's information + current time into the task array */
 			strcpy(taskProp[amTasks].desc, temp);
 			taskProp[amTasks].pd = pd;
-			taskProp[amTasks].st = currentTime;
+			taskProp[amTasks].st = 0;
 			taskProp[amTasks].duration = 0;
 			/* id always 1 ahead of amTasks */
 			taskProp[amTasks].id = amTasks + 1;
@@ -471,7 +471,7 @@ void listAtvTasks(char read[]){
 void moveTasks(char read[]){
 	int i = START, j, reading = 0, idTemp = 0, foundId = 0, foundUser = 0, foundAtv = 0;
 	int slack = 0, erro = 0;
-	char c = read[i], username[MAX_USERL], atvDesc[MAX_ATVL];
+	char c = read[i], username[MAX_USERL] = {0}, atvDesc[MAX_ATVL] = {0};
 	task actualTask;
 	atv actualAtv;
 	while(reading == 0 || !isspace(c)){
@@ -482,7 +482,7 @@ void moveTasks(char read[]){
 			idTemp = idTemp*10 + c - '0';
 		}
 		i++;
-		c=read[i];
+		c = read[i];
 	}
 	for(j = 0; j < amTasks && foundId == 0; j++){
 		if(taskProp[j].id == idTemp){
@@ -520,7 +520,7 @@ void moveTasks(char read[]){
 	i++;
 	c = read[i];
 
-	reading = 0, j = 0;
+	j = 0;
 	while(COND){
 		atvDesc[j] = c;
 		j++;
@@ -534,6 +534,7 @@ void moveTasks(char read[]){
 			foundAtv = 1;
 		}
 	}
+
 	if(erro == 0){
 		if(atvDesc == TODO){
 			printf(T_STARTED);
@@ -546,11 +547,18 @@ void moveTasks(char read[]){
 		}
 		else{
 			if(strcmp(actualTask.currAtv, S_TODO) == 0){
-				actualTask.st = currentTime;
+				if(strcmp(actualAtv.desc, S_DONE) == 0){
+					actualTask.duration = 0;
+				}
+				else{
+					actualTask.st = currentTime;
+					actualTask.duration = 0;
+				}
+			}
+			else{
+				actualTask.duration = currentTime - actualTask.st;
 			}
 			strcpy(actualTask.currAtv, actualAtv.desc);
-			printf("%s\n", actualTask.currAtv);
-			actualTask.duration = currentTime - actualTask.st;
 			if(strcmp(actualAtv.desc, S_DONE) == 0){
 				slack = actualTask.duration - actualTask.pd;
 				printf("duration=%d slack=%d\n", actualTask.duration, slack);
