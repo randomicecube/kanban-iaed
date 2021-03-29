@@ -16,11 +16,11 @@
 /* max input length */
 #define MAX_LENGTH 200
 /* max username length */
-#define MAX_USERL 20
+#define MAX_USERL 21
 /* max task description length */
-#define MAX_TASKL 50
+#define MAX_TASKL 51
 /* max activity description length */
-#define MAX_ATVL 20
+#define MAX_ATVL 21
 
 /* condition to stop reading input - the user is done writing */
 #define COND (c != '\0' && c != '\n' && c != EOF)
@@ -28,12 +28,6 @@
 #define FAIL -1
 /* beginning of the timer */
 #define ZERO 0
-/* TO DO index */
-#define TODO 0
-/* IN PROGRESS index */
-#define INPROGRESS 1
-/* DONE index */
-#define DONE 2
 /* start reading from the input's stream after considering the command character*/
 #define START 2
 
@@ -55,9 +49,14 @@
 /* time-related printf macros */
 #define TIME_INVALID "invalid time \n"
 
+/* descriptions and indexes of TO DO, IN PROGRESS and DONE */
+#define TODO 0
 #define S_TODO "TO DO"
+#define INPROGRESS 1
 #define S_INPROGRESS "IN PROGRESS"
+#define DONE 2
 #define S_DONE "DONE"
+
 
 /* -------------------------------------STRUCTS------------------------------------- */
 
