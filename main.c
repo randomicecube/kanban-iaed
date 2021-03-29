@@ -43,14 +43,14 @@ int main(){
 			case 'n':
 				advance(input);
 				break;
+			case 'u':
+				addUser(input);
+				break;
 			case 'm':
 				moveTasks(input);
 				break;
 			case 'd':
 				listAtvTasks(input);
-				break;
-			case 'u':
-				addUser(input);
 				break;
 			case 'a':
 				addActivity(input);				
@@ -59,7 +59,7 @@ int main(){
 		}		
 		/* clear the input array for the next stream of input */
 		strcpy(input, "");
-	}while(state == 0);
+	}while(!state);
 
 	return 0;
 }
