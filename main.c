@@ -545,6 +545,11 @@ void moveTasks(char read[]){
 			printf(A_NOTFOUND);
 		}
 		else{
+			if(strcmp(actualTask.currAtv, S_TODO) == 0){
+				actualTask.st = currentTime;
+			}
+			strcpy(actualTask.currAtv, actualAtv.desc);
+			printf("%s\n", actualTask.currAtv);
 			actualTask.duration = currentTime - actualTask.st;
 			if(strcmp(actualAtv.desc, S_DONE) == 0){
 				slack = actualTask.duration - actualTask.pd;
