@@ -57,6 +57,10 @@
 #define DONE 2
 #define S_DONE "DONE"
 
+#define DUP_TASK 'T'
+#define DUP_USER 'U'
+#define DUP_ATV 'A'
+
 
 /* -------------------------------------STRUCTS------------------------------------- */
 
@@ -102,10 +106,17 @@ void advance(char read[]);
 void listTasks(char read[]);
 /* lists all the tasks currently in a given activity */
 void listAtvTasks(char read[]);
-/* checks if a given ID is an ID of any task in the system */
-int anyId(int n, int size, task v[]);
 void moveTasks(char read[]);
 
+/* checks if a given ID is an ID of any task in the system */
+int anyId(int n, int size, task v[]);
+int readNumber(char v[], int start);
+const char* readUser(char v[], int start, int max);
+const char* readTaskAtv(char v[], int start, int max);
+int getNextIndex(char v[], int start);
+const char* readString(char v[], int start, int max);
+int dupSearch(char v, char s[], int n);
+void printTasks(task v[], int n);
 /* -----------------------------------GLOBAL VARS----------------------------------- */
 
 /* the program's current time */
