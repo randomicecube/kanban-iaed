@@ -77,38 +77,36 @@ void addTask(char read[]){
 	/* the system cannot accept more tasks */
 	if(amTasks == MAX_TASK){
     	printf(T_TOOMANY);
+		return;
 	}
 	
-	else{
-		pd = readNumber(read, START);
-		index = getNextIndex(read, START);
+	pd = readNumber(read, START);
+	index = getNextIndex(read, START);
 
-		/* reading the task's description */
-		strcpy(temp, readTaskAtv(read, index, MAX_TASKL));
+	/* reading the task's description */
+	strcpy(temp, readTaskAtv(read, index, MAX_TASKL));
 
-		/* happens if the description exists in the system */
-		if(dupSearch(DUP_TASK, temp, amTasks) == 1){
-			printf(T_EXISTS);
-		}
-
-		/* if the description is valid */
-		else{
-			/* copying the input's information + current time into the task array */
-			strcpy(taskProp[amTasks].desc, temp);
-			taskProp[amTasks].pd = pd;
-			taskProp[amTasks].st = 0;
-			taskProp[amTasks].duration = 0;
-			/* id always 1 ahead of amTasks */
-			taskProp[amTasks].id = amTasks + 1;
-
-			/* tasks always start in the TO DO activity */
-			strcpy(taskProp[amTasks].currAtv, atvProp[TODO].desc);
-			atvProp[TODO].noTasks++;
-
-			printf(T_WRITEID, taskProp[amTasks].id);
-			amTasks++;
-		}	
+	/* happens if the description exists in the system */
+	if(dupSearch(DUP_TASK, temp, amTasks) == 1){
+		printf(T_EXISTS);
+		return;
 	}
+
+	/* copying the input's information + current time into the task array */
+	strcpy(taskProp[amTasks].desc, temp);
+	taskProp[amTasks].pd = pd;
+	taskProp[amTasks].st = 0;
+	taskProp[amTasks].duration = 0;
+	/* id always 1 ahead of amTasks */
+	taskProp[amTasks].id = amTasks + 1;
+
+	/* tasks always start in the TO DO activity */
+	strcpy(taskProp[amTasks].currAtv, atvProp[TODO].desc);
+	atvProp[TODO].noTasks++;
+
+	printf(T_WRITEID, taskProp[amTasks].id);
+	amTasks++;
+
 	return;
 }
 
@@ -122,13 +120,16 @@ void addUser(char read[]){
 	strcpy(temp, readUser(read, START, MAX_USERL));
     if(dupSearch(DUP_USER, temp, amUsers) == 1){
         printf(U_EXISTS);
+		return;
     }
 	/* happens if the system can't accept more users */
-	else if(amUsers == MAX_USER){
+	if(amUsers == MAX_USER){
 		printf(U_TOOMANY);
+		return;
 	}
+	
 	/* happens if the system is adding a user */
-    else if(strcmp(temp, "") != 0){
+    if(strcmp(temp, "") != 0){
     	strcpy(userProp[amUsers].desc, temp);
         amUsers++;
  	}
@@ -144,41 +145,35 @@ void addUser(char read[]){
 
 /* adds an activity to the system/lists all activities by creation date - 'a' command */
 void addActivity(char read[]){
-	int j, min = 0;
-    /* 0 if there's no duplicate description found, 1 if there is */
-    int dup = 0;
+	int j;
     /* temporary array containing an activity's description */
     char temp[MAX_ATVL] = {0};
 
 	strcpy(temp, readTaskAtv(read, START, MAX_ATVL));
 
-    for(j = 0; j < (int) strlen(temp); j++){
-		if(islower(temp[j])){
-			min = 1;
-		}
-	}
-
 	/* checks if the description is already in the system */
-    for(j = 0; j < amAtvs && dup == 0; j++){
+    for(j = 0; j < amAtvs; j++){
     	if (strcmp(temp, atvProp[j].desc) == 0){
-        	dup = 1;
+        	printf(A_INVALID);
+			return;
         }
     }
 
-	/* happens if the description is already in the system */
-    if(dup == 1){
-    	printf(A_EXISTS);
-    }
-	/* happens if the description was written wrongly - including lowercase characters */
-	else if(min == 1){
-		printf(A_INVALID);
+    for(j = 0; j < (int) strlen(temp); j++){
+		if(islower(temp[j])){
+			printf(A_EXISTS);
+			return;
+		}
 	}
+
 	/* happens if the system can't accept more activities */
-    else if(amAtvs == MAX_ATV && strcmp(temp, "") != 0){
+    if(amAtvs == MAX_ATV && strcmp(temp, "") != 0){
     	printf(A_TOOMANY);
+		return;
     }
+
 	/* happens if the request is to add an activity */
-    else if(strcmp(temp, "") != 0){
+    if(strcmp(temp, "") != 0){
     	strcpy(atvProp[amAtvs].desc, temp);
         amAtvs++;
     }
@@ -197,13 +192,12 @@ void advance(char read[]){
 	int i = START;
 	int time = 0, reading = 0;
 	char c = read[i];
-	/* if at 0, the input is considered correct; if at 1, it's not a non negative decimal */
-	int wrong = 0;
 
 	while(COND && (!isspace(c) || reading == 0)){
 		/* checks if a representation of negative/float/double notation was used */
 		if(c == '-' || c == '.'){
-			wrong = 1;
+			printf(TIME_INVALID);
+			return;
 		}
 		else{
 			if(isdigit((int) c)){
@@ -217,18 +211,12 @@ void advance(char read[]){
 		c = read[i];
 	}
 
-	/* happens if the time isn't invalid */
-	if(wrong != 1){
-		if(time != 0){
-			currentTime += time;
-		}
-
-		printf("%d\n", currentTime);
+	/* happens if the time isn't invalid */	
+	if(time != 0){
+		currentTime += time;
 	}
-	/* happens if the time is invalid */
-	else{
-		printf(TIME_INVALID);
-	}
+	printf("%d\n", currentTime);
+	
 	return;
 }
 
@@ -306,51 +294,53 @@ void listAtvTasks(char read[]){
 		if(!strcmp(atvProp[j].desc, activity)){
 			found = 1;
 			wanted = atvProp[j];
+			printf("activity's name: %s, no. tasks: %d\n", wanted.desc, wanted.noTasks);
 		}
 	}
 
 	if(found == 0){
 		printf(A_NOTFOUND);
+		return;
 	}
-
-	else{
-		cap = wanted.noTasks;
-		for(i = 0; i < amTasks; i++){
-			if(strcmp(taskProp[i].currAtv, wanted.desc) == 0){
-				ordered[index] = taskProp[i];
-				index++;
-			}
+	
+	cap = wanted.noTasks;
+	for(i = 0; i < amTasks; i++){
+		if(strcmp(taskProp[i].currAtv, wanted.desc) == 0){
+			ordered[index] = taskProp[i];
+			index++;
 		}
-		/* bubble sort */
-		while(changed == 1){
-			changed = 0;
-			for(j = 0; j < cap - 1; j++){
-				if(ordered[j].st > ordered[j + 1].st){
+	}
+	
+	/* bubble sort */
+	while(changed == 1){
+		changed = 0;
+		for(j = 0; j < cap - 1; j++){
+			if(ordered[j].st > ordered[j + 1].st){
+				tempTask = ordered[j];
+				ordered[j] = ordered[j + 1];
+				ordered[j + 1] = tempTask;
+				changed = 1;
+			}
+			else if(ordered[j].st == ordered[j + 1].st){
+				if(strcmp(ordered[j].desc, ordered[j + 1].desc) > 0){
 					tempTask = ordered[j];
 					ordered[j] = ordered[j + 1];
 					ordered[j + 1] = tempTask;
 					changed = 1;
 				}
-				else if(ordered[j].st == ordered[j + 1].st){
-					if(strcmp(ordered[j].desc, ordered[j + 1].desc) > 0){
-						tempTask = ordered[j];
-						ordered[j] = ordered[j + 1];
-						ordered[j + 1] = tempTask;
-						changed = 1;
-					}
-				}
 			}
-			cap--;
 		}
-
-		for(j = 0; j < wanted.noTasks; j++){
-			printf("%d %d %s\n", \
-					ordered[j].id, \
-					ordered[j].st, \
-					ordered[j].desc \
-			);
-		}
+		cap--;
 	}
+
+	for(j = 0; j < wanted.noTasks; j++){
+		printf("%d %d %s\n", \
+				ordered[j].id, \
+				ordered[j].st, \
+				ordered[j].desc \
+		);
+	}
+
 	return;
 }
 
@@ -365,6 +355,7 @@ void moveTasks(char read[]){
 	i = getNextIndex(read, i);
 	if(anyId(idTemp, amTasks, taskProp) == FAIL){
 		printf(T_NOID, idTemp);
+		return;
 	}
 	
 	strcpy(username, readUser(read, i, MAX_USERL));
@@ -380,49 +371,54 @@ void moveTasks(char read[]){
 
 	if(strcmp(atvDesc,S_TODO) == 0){
 		printf(T_STARTED);
+		return;
 	}
-	else if(wrongUser == 1){
+	if(wrongUser == 1){
 		printf(U_NOTFOUND);
+		return;
 	}
-	else if(wrongAtv == 1){
+	if(wrongAtv == 1){
 		printf(A_NOTFOUND);
+		return;
+	}
+	
+	for(i = 0; i < amTasks; i++){
+		if(taskProp[i].id == idTemp){
+			wantedTask = taskProp[i];
+		}
+	}
+	strcpy(temp, wantedTask.currAtv);
+	for(i = 0; i < amAtvs; i++){
+		if(strcmp(atvDesc, atvProp[i].desc) == 0){
+			wantedAtv = atvProp[i];
+		}
+		else if(strcmp(temp, atvProp[i].desc) == 0){
+			beforeAtv = atvProp[i];
+		}
+	}
+		
+	beforeAtv.noTasks--;
+	wantedAtv.noTasks++;
+
+	strcpy(wantedTask.currAtv, atvDesc);
+
+	printf("activity's name: %s, no. tasks: %d\n", wantedAtv.desc, wantedAtv.noTasks);
+
+	if(strcmp(temp, S_TODO) == 0){
+		wantedTask.duration = 0;
+		if(strcmp(atvDesc, S_DONE) != 0){
+			wantedTask.st = currentTime;
+		}
 	}
 	else{
-		for(i = 0; i < amTasks; i++){
-			if(taskProp[i].id == idTemp){
-				wantedTask = taskProp[i];
-			}
-		}
-		strcpy(temp, wantedTask.currAtv);
-		for(i = 0; i < amAtvs; i++){
-			if(strcmp(atvDesc, atvProp[i].desc) == 0){
-				wantedAtv = atvProp[i];
-			}
-			else if(strcmp(temp, atvProp[i].desc) == 0){
-				beforeAtv = atvProp[i];
-			}
-		}
-		
-		beforeAtv.noTasks--;
-		wantedAtv.noTasks++;
-
-		strcpy(wantedTask.currAtv, wantedAtv.desc);
-
-		if(strcmp(temp, S_TODO) == 0){
-			wantedTask.duration = 0;
-			if(strcmp(atvDesc, S_DONE) != 0){
-				wantedTask.st = currentTime;
-			}
-		}
-		else{
-			wantedTask.duration = currentTime - wantedTask.st;
-		}
-		wantedTask.slack = wantedTask.st - wantedTask.pd;
-
-		if(strcmp(atvDesc, S_DONE) == 0){
-			printf("duration=%d slack=%d\n", wantedTask.duration, wantedTask.slack);
-		}
+		wantedTask.duration = currentTime - wantedTask.st;
 	}
+	wantedTask.slack = wantedTask.st - wantedTask.pd;
+
+	if(strcmp(atvDesc, S_DONE) == 0){
+		printf("duration=%d slack=%d\n", wantedTask.duration, wantedTask.slack);
+	}
+	
 	return;
 }
 
