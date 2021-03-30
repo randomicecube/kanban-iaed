@@ -470,11 +470,16 @@ int getNextIndex(char v[], int start){
 }
 
 const char* readTaskAtv(char v[], int start, int max){ 
-	int i = start, index = 0;
+	int i = start, index = 0, reading = 0;
 	char *res = malloc(MAX_TASKL), temp[MAX_TASKL] = {0}, c = v[i];
 	while(COND && index < max){
-		temp[index] = c;
-		index++;
+		if (reading == 0 && !isspace(c)){
+			reading = 1;
+		}
+		if(reading == 1){
+			temp[index] = c;
+			index++;
+		}
 		i++;
 		c = v[i];
 	}
@@ -483,28 +488,21 @@ const char* readTaskAtv(char v[], int start, int max){
 }
 
 const char* readUser(char v[], int start, int max){
-	int i = start, index = 0, space = 0;
+	int i = start, index = 0, stop = 0, reading = 0;
 	char *res = malloc(MAX_USERL), temp[MAX_USERL] = {0}, c = v[i];
-	while(COND && (space == 0 || space == 1) && index < max){
-		/* if the name hasn't started being written yet */
-        if(space == 0){
-			/* isalpha(c) being true means we can start writing the name */
-			if(isalpha(c)){
-				space = 1;
+	while(COND && index < max && stop == 0){
+		if(reading == 0 && !isspace(c)){
+			reading = 1;
+		}
+		if(reading == 1){
+			if(isspace(c)){
+				stop = 1;
+			}
+			else{
 				temp[index] = c;
 				index++;
 			}
 		}
-		/* the name is being written but we found a space/tab */
-		else if(space == 1 && isspace(c)){
-			space = 2;
-		}
-		/* if the name is already being written */
-		else{
-			temp[index] = c;
-            index ++;
-		}
-
 		i++;
 		c = v[i];
 	}
