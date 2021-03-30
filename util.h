@@ -14,7 +14,7 @@
 #define MAX_ATV 10
 
 /* max input length */
-#define MAX_LENGTH 200
+#define MAX_LENGTH 100000
 /* max username length */
 #define MAX_USERL 21
 /* max task description length */
