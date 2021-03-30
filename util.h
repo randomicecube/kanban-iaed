@@ -109,16 +109,16 @@ void moveTasks(char read[]);
 /* -----------------------------------GLOBAL VARS----------------------------------- */
 
 /* the program's current time */
-static int currentTime = 0;
+int currentTime = 0;
 
 /* array with data regarding all the tasks in the system */
-static task taskProp[MAX_TASK];
+task taskProp[MAX_TASK];
 /* array with data regarding all the users in the system */
-static user userProp[MAX_USER];
+user userProp[MAX_USER];
 /* array with data regarding all the activities in the system */
-static atv atvProp[MAX_ATV];
+atv atvProp[MAX_ATV];
 
 /* amount of tasks, users and activities in the system, respectively */
-static int amTasks = 0;
-static int amUsers = 0;
-static int amAtvs = 0;
+int amTasks = 0;
+int amUsers = 0;
+int amAtvs = 0;
