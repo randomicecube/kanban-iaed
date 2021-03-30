@@ -103,7 +103,6 @@ void addTask(char read[]){
 
 			/* tasks always start in the TO DO activity */
 			strcpy(taskProp[amTasks].currAtv, atvProp[TODO].desc);
-			atvProp[TODO].Tasks[atvProp[TODO].noTasks] = taskProp[amTasks];
 			atvProp[TODO].noTasks++;
 
 			printf(T_WRITEID, taskProp[amTasks].id);
@@ -295,11 +294,11 @@ void listTasks(char read[]){
 
 void listAtvTasks(char read[]){
 
-	int j = 0, found = 0, changed = 1;
+	int i, j = 0, found = 0, index = 0, changed = 1;
 	int cap;
 	char activity[MAX_ATVL];
-	task tempTask;
-	atv wanted, ordered;
+	task tempTask, ordered[MAX_TASK];
+	atv wanted;
 	
 	strcpy(activity, readTaskAtv(read, START, MAX_ATVL));
 
@@ -316,22 +315,27 @@ void listAtvTasks(char read[]){
 
 	else{
 		cap = wanted.noTasks;
-		ordered = wanted;
+		for(i = 0; i < amTasks; i++){
+			if(strcmp(taskProp[i].currAtv, wanted.desc) == 0){
+				ordered[index] = taskProp[i];
+				index++;
+			}
+		}
 		/* bubble sort */
 		while(changed == 1){
 			changed = 0;
 			for(j = 0; j < cap - 1; j++){
-				if(ordered.Tasks[j].st > ordered.Tasks[j + 1].st){
-					tempTask = ordered.Tasks[j];
-					ordered.Tasks[j] = ordered.Tasks[j + 1];
-					ordered.Tasks[j + 1] = tempTask;
+				if(ordered[j].st > ordered[j + 1].st){
+					tempTask = ordered[j];
+					ordered[j] = ordered[j + 1];
+					ordered[j + 1] = tempTask;
 					changed = 1;
 				}
-				else if(wanted.Tasks[j].st == ordered.Tasks[j + 1].st){
-					if(strcmp(ordered.Tasks[j].desc, ordered.Tasks[j + 1].desc) > 0){
-						tempTask = ordered.Tasks[j];
-						ordered.Tasks[j] = ordered.Tasks[j + 1];
-						ordered.Tasks[j + 1] = tempTask;
+				else if(ordered[j].st == ordered[j + 1].st){
+					if(strcmp(ordered[j].desc, ordered[j + 1].desc) > 0){
+						tempTask = ordered[j];
+						ordered[j] = ordered[j + 1];
+						ordered[j + 1] = tempTask;
 						changed = 1;
 					}
 				}
@@ -339,13 +343,11 @@ void listAtvTasks(char read[]){
 			cap--;
 		}
 
-		printf("im here\n");
-
-		for(j = 0; j < ordered.noTasks; j++){
+		for(j = 0; j < wanted.noTasks; j++){
 			printf("%d %d %s\n", \
-					ordered.Tasks[j].id, \
-					ordered.Tasks[j].st, \
-					ordered.Tasks[j].desc \
+					ordered[j].id, \
+					ordered[j].st, \
+					ordered[j].desc \
 			);
 		}
 	}
@@ -353,110 +355,84 @@ void listAtvTasks(char read[]){
 }
 
 void moveTasks(char read[]){
-	int i = START, j, reading = 0, idTemp = 0, foundId = 0, foundUser = 0, foundAtv = 0;
-	int slack = 0, erro = 0;
-	char c = read[i], username[MAX_USERL] = {0}, atvDesc[MAX_ATVL] = {0};
-	task actualTask;
-	atv actualAtv;
-	while(reading == 0 || !isspace(c)){
-		if(isdigit((int) c) && reading == 0){
-			reading = 1;
-		}
-		if(reading == 1){
-			idTemp = idTemp*10 + c - '0';
-		}
-		i++;
-		c = read[i];
-	}
-	for(j = 0; j < amTasks && foundId == 0; j++){
-		if(taskProp[j].id == idTemp){
-			actualTask = taskProp[j];
-			foundId = 1;
-		}
-	}
-	if(foundId == 0){
+	int i = START, idTemp = 0;
+	int wrongUser = 0, wrongAtv = 0;
+	char temp[MAX_ATVL], username[MAX_USERL] = {0}, atvDesc[MAX_ATVL] = {0};
+	task wantedTask;
+	atv beforeAtv, wantedAtv;
+	
+	idTemp = readNumber(read, i);
+	i = getNextIndex(read, i);
+	if(anyId(idTemp, amTasks, taskProp) == FAIL){
 		printf(T_NOID, idTemp);
-		erro = 1;
+	}
+	
+	strcpy(username, readUser(read, i, MAX_USERL));
+	i = getNextIndex(read, i);
+	if(dupSearch(DUP_USER, username, amUsers) == ZERO){
+		wrongUser = 1;
 	}
 
-	i++;
-	c = read[i];
-
-	reading = 0, j = 0;
-	while(reading == 0 || !isspace(c)){
-		if(isalpha(c) && reading == 0){
-			reading = 1;
-		}
-		if(reading == 1){
-			username[j] = c;
-			j++;
-		}
-		i++;
-		c=read[i];
+	strcpy(atvDesc, readTaskAtv(read, i, MAX_ATVL));
+	if(dupSearch(DUP_ATV, atvDesc, amAtvs) == ZERO){
+		wrongAtv = 1;
 	}
 
-	for(j = 0; j < amUsers && foundUser == 0; j++){
-		if(strcmp(userProp[j].desc, username) == 0){
-			foundUser = 1;
-		}
+	if(strcmp(atvDesc,S_TODO) == 0){
+		printf(T_STARTED);
 	}
-
-	i++;
-	c = read[i];
-
-	j = 0;
-	while(COND){
-		atvDesc[j] = c;
-		j++;
-		i++;
-		c = read[i];
+	else if(wrongUser == 1){
+		printf(U_NOTFOUND);
 	}
-
-	for(j = 0; j < amAtvs && foundAtv == 0; j++){
-		if(strcmp(atvProp[j].desc, atvDesc) == 0){
-			actualAtv = atvProp[j];
-			foundAtv = 1;
-		}
+	else if(wrongAtv == 1){
+		printf(A_NOTFOUND);
 	}
+	else{
+		for(i = 0; i < amTasks; i++){
+			if(taskProp[i].id == idTemp){
+				wantedTask = taskProp[i];
+			}
+		}
+		strcpy(temp, wantedTask.currAtv);
+		for(i = 0; i < amAtvs; i++){
+			if(strcmp(atvDesc, atvProp[i].desc) == 0){
+				wantedAtv = atvProp[i];
+			}
+			else if(strcmp(temp, atvProp[i].desc) == 0){
+				beforeAtv = atvProp[i];
+			}
+		}
+		
+		beforeAtv.noTasks--;
+		wantedAtv.noTasks++;
 
-	if(erro == 0){
-		if(atvDesc == TODO){
-			printf(T_STARTED);
-		}
-		else if(foundUser == 0){
-			printf(U_NOTFOUND);
-		}
-		else if(foundAtv == 0){
-			printf(A_NOTFOUND);
+		strcpy(wantedTask.currAtv, wantedAtv.desc);
+
+		if(strcmp(temp, S_TODO) == 0){
+			wantedTask.duration = 0;
+			if(strcmp(atvDesc, S_DONE) != 0){
+				wantedTask.st = currentTime;
+			}
 		}
 		else{
-			if(strcmp(actualTask.currAtv, S_TODO) == 0){
-				if(strcmp(actualAtv.desc, S_DONE) == 0){
-					actualTask.duration = 0;
-				}
-				else{
-					actualTask.st = currentTime;
-					actualTask.duration = 0;
-				}
-				atvProp[TODO].noTasks--;
-			}
-			else{
-				actualTask.duration = currentTime - actualTask.st;
-				/*tirar uma task à atividade que dá ghost*/
-				atvProp[actualAtv.desc].noTasks--;
-			}
-			/* adicionar uma task à atividade nova */
-			atvProp[actualAtv.desc].noTasks++;
+			wantedTask.duration = currentTime - wantedTask.st;
+		}
+		wantedTask.slack = wantedTask.st - wantedTask.pd;
 
-			strcpy(actualTask.currAtv, actualAtv.desc);
-			if(strcmp(actualAtv.desc, S_DONE) == 0){
-				slack = actualTask.duration - actualTask.pd;
-				printf("duration=%d slack=%d\n", actualTask.duration, slack);
-			}
+		if(strcmp(atvDesc, S_DONE) == 0){
+			printf("duration=%d slack=%d\n", wantedTask.duration, wantedTask.slack);
 		}
 	}
 	return;
 }
+
+
+
+
+/* aux functions*/
+
+
+
 
 /* returns -1 if the ID isn't in the system or its index in the tasks array if it is */
 int anyId(int n, int size, task v[]){
@@ -552,7 +528,6 @@ void printTasks(task v[], int n){
 	}
 	return;
 }
-
 
 int dupSearch(char v, char s[], int n){
 	

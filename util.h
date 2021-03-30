@@ -71,6 +71,7 @@ typedef struct task{
     int st;
     int id;
     int duration;
+    int slack;
     /* stores the task's description */
     char desc[MAX_TASKL];
     char currAtv[MAX_ATVL];
@@ -88,8 +89,6 @@ typedef struct activity{
     char desc[MAX_ATVL];
     /* how many tasks are currently in the activity's scope */
     int noTasks;
-    /* descriptions of the tasks currently in the activity's scope */
-    task Tasks[MAX_TASK];
 }atv;
 
 /* -----------------------------------PROTOTYPES------------------------------------ */
@@ -117,6 +116,8 @@ int getNextIndex(char v[], int start);
 const char* readString(char v[], int start, int max);
 int dupSearch(char v, char s[], int n);
 void printTasks(task v[], int n);
+int getAtvIndex(atv v[], char s[], int n);
+
 /* -----------------------------------GLOBAL VARS----------------------------------- */
 
 /* the program's current time */
