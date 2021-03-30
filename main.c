@@ -56,7 +56,7 @@ int main(){
 				addActivity(input);				
 			default:
 				break;	
-		}		
+		}
 		/* clear the input array for the next stream of input */
 		strcpy(input, "");
 	}while(!state);
@@ -284,8 +284,8 @@ void listAtvTasks(char read[]){
 
 	int i, j = 0, found = 0, index = 0, changed = 1;
 	int cap;
-	char activity[MAX_ATVL];
-	task tempTask, ordered[MAX_TASK];
+	char activity[MAX_ATVL] = {0};
+	task tempTask, ordered[MAX_TASK] = {0};
 	atv wanted;
 	
 	strcpy(activity, readTaskAtv(read, START, MAX_ATVL));
@@ -294,7 +294,6 @@ void listAtvTasks(char read[]){
 		if(!strcmp(atvProp[j].desc, activity)){
 			found = 1;
 			wanted = atvProp[j];
-			printf("activity's name: %s, no. tasks: %d\n", wanted.desc, wanted.noTasks);
 		}
 	}
 
@@ -345,11 +344,9 @@ void listAtvTasks(char read[]){
 }
 
 void moveTasks(char read[]){
-	int i = START, idTemp = 0;
+	int i = START, idTemp = 0, afterAtv, beforeAtv, afterTask;
 	int wrongUser = 0, wrongAtv = 0;
-	char temp[MAX_ATVL], username[MAX_USERL] = {0}, atvDesc[MAX_ATVL] = {0};
-	task wantedTask;
-	atv beforeAtv, wantedAtv;
+	char temp[MAX_ATVL] = {0}, username[MAX_USERL] = {0}, atvDesc[MAX_ATVL] = {0};
 	
 	idTemp = readNumber(read, i);
 	i = getNextIndex(read, i);
@@ -384,41 +381,39 @@ void moveTasks(char read[]){
 	
 	for(i = 0; i < amTasks; i++){
 		if(taskProp[i].id == idTemp){
-			wantedTask = taskProp[i];
+			afterTask = i;
 		}
 	}
-	strcpy(temp, wantedTask.currAtv);
+	strcpy(temp, taskProp[afterTask].currAtv);
 	for(i = 0; i < amAtvs; i++){
 		if(strcmp(atvDesc, atvProp[i].desc) == 0){
-			wantedAtv = atvProp[i];
+			afterAtv = i;
 		}
 		else if(strcmp(temp, atvProp[i].desc) == 0){
-			beforeAtv = atvProp[i];
+			beforeAtv = i;
 		}
 	}
 		
-	beforeAtv.noTasks--;
-	wantedAtv.noTasks++;
+	atvProp[beforeAtv].noTasks--;
+	atvProp[afterAtv].noTasks++;
 
-	strcpy(wantedTask.currAtv, atvDesc);
-
-	printf("activity's name: %s, no. tasks: %d\n", wantedAtv.desc, wantedAtv.noTasks);
+	strcpy(taskProp[afterTask].currAtv, atvDesc);
 
 	if(strcmp(temp, S_TODO) == 0){
-		wantedTask.duration = 0;
+		taskProp[afterTask].duration = 0;
 		if(strcmp(atvDesc, S_DONE) != 0){
-			wantedTask.st = currentTime;
+			taskProp[afterTask].st = currentTime;
 		}
 	}
 	else{
-		wantedTask.duration = currentTime - wantedTask.st;
+		taskProp[afterTask].duration = currentTime - taskProp[afterTask].st;
 	}
-	wantedTask.slack = wantedTask.st - wantedTask.pd;
+	taskProp[afterTask].slack = taskProp[afterTask].st - taskProp[afterTask].pd;
 
 	if(strcmp(atvDesc, S_DONE) == 0){
-		printf("duration=%d slack=%d\n", wantedTask.duration, wantedTask.slack);
+		printf("duration=%d slack=%d\n", taskProp[afterTask].duration, taskProp[afterTask].slack);
 	}
-	
+
 	return;
 }
 
