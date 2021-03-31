@@ -210,11 +210,8 @@ void advance(char read[]){
 		i++;
 		c = read[i];
 	}
-
-	/* happens if the time isn't invalid */	
-	if(time != 0){
-		currentTime += time;
-	}
+	
+	currentTime += time;
 	printf("%d\n", currentTime);
 	
 	return;
@@ -234,6 +231,7 @@ void listTasks(char read[]){
 	/* used in the sorting algorihtm, how many "passes" the loop has to do */
 	int cap = amTasks;
 	/* contain an ordered subset of tasks and a general subset of tasks, respectively */
+	int erro = 0;
 	task ordered[MAX_TASK] = {0}, taskArray[MAX_TASK] = {0};
 	task tempTask;
 	char c = read[j];
@@ -245,12 +243,15 @@ void listTasks(char read[]){
 			any = anyId(idTemp, amTasks, taskProp);
 			if(any == FAIL){
 				printf(T_NOID, idTemp);
-				return;
 			}
 			else{
 				taskArray[idCount] = taskProp[any];
 				idCount++;
 			}
+		}
+		else{
+			printf(T_NOID, idTemp);
+			erro = 1;
 		}
 		c = read[j];
 	}
@@ -261,7 +262,7 @@ void listTasks(char read[]){
 	}
 
 	/* idCount == 0 -> list the tasks, sorted alphabetically by their descriptions */
-	else{
+	else if(erro == 0 && idCount == 0){
 		memcpy(ordered, taskProp, sizeof(taskProp));
 		/* bubble sort */
 		while(changed == 1){
@@ -440,7 +441,7 @@ int anyId(int n, int size, task v[]){
 
 /* aux function, works with pd and id */
 int readNumber(char v[], int start){
-	int i = start, reading = 0, res = -1; /* if -1, it never read anything */
+	int i = start, reading = 0, res = -1, menos = 0; /* if -1, it never read anything */
 	char c = v[i];
 	while(reading == 0 || !isspace(c)){
 		if(reading == 0 && !isspace(c)){
@@ -450,8 +451,14 @@ int readNumber(char v[], int start){
 		if(isdigit((int) c)){
 		 	res = res * 10 + (c - '0');
 		}
+		if(c == '-'){
+			menos = 1;
+		}
 		i++;
 		c = v[i];
+	}
+	if(menos == 1 && res != FAIL){
+		res = -res;
 	}
 	return res;
 }
