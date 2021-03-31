@@ -10,10 +10,9 @@
 #include <string.h>
 #include "util.h"
 
+/* main program's function */
 int main(){
-
 	char input[MAX_LENGTH];
-
 	/* stores the program's state - at 0 the program keeps running, at 1 it stops */
 	int state = 0;
 
@@ -66,7 +65,6 @@ int main(){
 
 /* adds a task to the system - 't' command */
 void addTask(char read[]){
-
 	/* index of the character being read */
 	int index;
 	/* predicted duration */
@@ -194,7 +192,6 @@ void addActivity(char read[]){
 
 /* advances the system's time - 'n' command*/
 void advance(char read[]){
-	
 	int i = START;
 	int time = 0, reading = 0;
 	char c = read[i];
@@ -217,7 +214,6 @@ void advance(char read[]){
 		i++;
 		c = read[i];
 	}
-	
 	currentTime += time;
 	printf("%d\n", currentTime);
 	
@@ -288,7 +284,6 @@ void listTasks(char read[]){
 
 /* prints the tasks currently in a given activity's scope */
 void listAtvTasks(char read[]){
-
 	int i, j = 0, found = 0, index = 0, changed = 1;
 	int cap;
 	char activity[MAX_ATVL] = {0};
@@ -588,3 +583,5 @@ int dupSearch(char v, char s[], int n){
 	}
 	return dup;
 }
+
+/* comment do pepe */
