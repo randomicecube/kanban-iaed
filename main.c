@@ -84,7 +84,8 @@ void addTask(char read[]){
 	index = getNextIndex(read, START);
 
 	/* reading the task's description */
-	strcpy(temp, readTaskAtv(read, index, MAX_TASKL));
+	strcpy(temp, "");
+	readTaskAtv(read, temp, index, MAX_TASKL);
 
 	/* happens if the description exists in the system */
 	if(dupSearch(DUP_TASK, temp, amTasks) == 1){
@@ -117,7 +118,8 @@ void addUser(char read[]){
     char temp[MAX_USERL] = {0};
 	/* while at 0, temp doesn't store characters */
 	
-	strcpy(temp, readUser(read, START, MAX_USERL));
+	strcpy(temp, "");
+	readUser(read, temp, START, MAX_USERL);
     if(dupSearch(DUP_USER, temp, amUsers) == 1){
         printf(U_EXISTS);
 		return;
@@ -149,7 +151,8 @@ void addActivity(char read[]){
     /* temporary array containing an activity's description */
     char temp[MAX_ATVL] = {0};
 
-	strcpy(temp, readTaskAtv(read, START, MAX_ATVL));
+	strcpy(temp, "");
+	readTaskAtv(read, temp, START, MAX_ATVL);
 
 	/* checks if the description is already in the system */
     for(j = 0; j < amAtvs; j++){
@@ -224,7 +227,6 @@ void listTasks(char read[]){
 	int any;
 	/* contains a temporary value of an ID  */
 	int idTemp = 0;
-	/* how many ID's have been counted from the input stream */
 	int idCount = 0;
 	/* used in the sorting algorithm - 1 if there were changes made, 0 if not */ 
 	int changed = 1;
@@ -232,37 +234,31 @@ void listTasks(char read[]){
 	int cap = amTasks;
 	/* contain an ordered subset of tasks and a general subset of tasks, respectively */
 	int erro = 0;
-	task ordered[MAX_TASK] = {0}, taskArray[MAX_TASK] = {0};
+	task ordered[MAX_TASK] = {0};
 	task tempTask;
 	char c = read[j];
 
 	while(COND){
 		idTemp = readNumber(read, j);
 		j = getNextIndex(read, j);
-		if(idTemp > 0){
-			any = anyId(idTemp, amTasks, taskProp);
-			if(any == FAIL){
-				printf(T_NOID, idTemp);
-			}
-			else{
-				taskArray[idCount] = taskProp[any];
-				idCount++;
-			}
+		any = anyId(idTemp, amTasks, taskProp);
+		if(any == FAIL){
+			printf(T_NOID, idTemp);
+			erro++;
 		}
 		else{
-			printf(T_NOID, idTemp);
-			erro = 1;
+			printf("%d %s #%d %s\n", \
+					taskProp[any].id, \
+					taskProp[any].currAtv, \
+					taskProp[any].pd, \
+					taskProp[any].desc
+					);
+			idCount++;
 		}
 		c = read[j];
 	}
 
-	/* idCount > 0 -> list the tasks, sorted by their ID */
-	if(idCount > 0){
-		printTasks(taskArray, idCount);
-	}
-
-	/* idCount == 0 -> list the tasks, sorted alphabetically by their descriptions */
-	else if(erro == 0 && idCount == 0){
+	if(erro == 0 && idCount == 0){
 		memcpy(ordered, taskProp, sizeof(taskProp));
 		/* bubble sort */
 		while(changed == 1){
@@ -290,7 +286,8 @@ void listAtvTasks(char read[]){
 	task tempTask, ordered[MAX_TASK] = {0};
 	atv wanted;
 	
-	strcpy(activity, readTaskAtv(read, START, MAX_ATVL));
+	strcpy(activity, "");
+	readTaskAtv(read, activity, START, MAX_ATVL);
 
 	for(j = 0; j < amAtvs && found == 0; j++){
 		if(!strcmp(atvProp[j].desc, activity)){
@@ -357,13 +354,15 @@ void moveTasks(char read[]){
 		return;
 	}
 	
-	strcpy(username, readUser(read, i, MAX_USERL));
+	strcpy(username, "");
+	readUser(read, username, i, MAX_USERL);
 	i = getNextIndex(read, i);
 	if(dupSearch(DUP_USER, username, amUsers) == ZERO){
 		wrongUser = 1;
 	}
 
-	strcpy(atvDesc, readTaskAtv(read, i, MAX_ATVL));
+	strcpy(atvDesc, "");
+	readTaskAtv(read, atvDesc, i, MAX_ATVL);
 	if(dupSearch(DUP_ATV, atvDesc, amAtvs) == ZERO){
 		wrongAtv = 1;
 	}
@@ -477,27 +476,26 @@ int getNextIndex(char v[], int start){
 	return i;
 }
 
-const char* readTaskAtv(char v[], int start, int max){ 
+void readTaskAtv(char v[], char *s, int start, int max){ 
 	int i = start, index = 0, reading = 0;
-	char *res = malloc(MAX_TASKL), temp[MAX_TASKL] = {0}, c = v[i];
+	char c = v[i];
 	while(COND && index < max){
 		if (reading == 0 && !isspace(c)){
 			reading = 1;
 		}
 		if(reading == 1){
-			temp[index] = c;
+			s[index] = c;
 			index++;
 		}
 		i++;
 		c = v[i];
 	}
-	strcpy(res, temp);
-	return res;
+	return;
 }
 
-const char* readUser(char v[], int start, int max){
+void readUser(char v[], char *s, int start, int max){
 	int i = start, index = 0, stop = 0, reading = 0;
-	char *res = malloc(MAX_USERL), temp[MAX_USERL] = {0}, c = v[i];
+	char c = v[i];
 	while(COND && index < max && stop == 0){
 		if(reading == 0 && !isspace(c)){
 			reading = 1;
@@ -507,15 +505,14 @@ const char* readUser(char v[], int start, int max){
 				stop = 1;
 			}
 			else{
-				temp[index] = c;
+				s[index] = c;
 				index++;
 			}
 		}
 		i++;
 		c = v[i];
 	}
-	strcpy(res, temp);
-	return res;
+	return;
 }
 
 void printTasks(task v[], int n){

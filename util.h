@@ -111,10 +111,9 @@ void moveTasks(char read[]);
 /* checks if a given ID is an ID of any task in the system */
 int anyId(int n, int size, task v[]);
 int readNumber(char v[], int start);
-const char* readUser(char v[], int start, int max);
-const char* readTaskAtv(char v[], int start, int max);
+void readUser(char v[], char *s, int start, int max);
+void readTaskAtv(char v[], char *s, int start, int max);
 int getNextIndex(char v[], int start);
-const char* readString(char v[], int start, int max);
 int dupSearch(char v, char s[], int n);
 void printTasks(task v[], int n);
 int getAtvIndex(atv v[], char s[], int n);
