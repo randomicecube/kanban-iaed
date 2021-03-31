@@ -154,14 +154,14 @@ void addActivity(char read[]){
 	/* checks if the description is already in the system */
     for(j = 0; j < amAtvs; j++){
     	if (strcmp(temp, atvProp[j].desc) == 0){
-        	printf(A_INVALID);
+        	printf(A_EXISTS);
 			return;
         }
     }
 
     for(j = 0; j < (int) strlen(temp); j++){
 		if(islower(temp[j])){
-			printf(A_EXISTS);
+			printf(A_INVALID);
 			return;
 		}
 	}
@@ -245,6 +245,7 @@ void listTasks(char read[]){
 			any = anyId(idTemp, amTasks, taskProp);
 			if(any == FAIL){
 				printf(T_NOID, idTemp);
+				return;
 			}
 			else{
 				taskArray[idCount] = taskProp[any];
@@ -351,7 +352,7 @@ void moveTasks(char read[]){
 	idTemp = readNumber(read, i);
 	i = getNextIndex(read, i);
 	if(anyId(idTemp, amTasks, taskProp) == FAIL){
-		printf(T_NOID, idTemp);
+		printf(NO_ID_M);
 		return;
 	}
 	
@@ -408,7 +409,7 @@ void moveTasks(char read[]){
 	else{
 		taskProp[afterTask].duration = currentTime - taskProp[afterTask].st;
 	}
-	taskProp[afterTask].slack = taskProp[afterTask].st - taskProp[afterTask].pd;
+	taskProp[afterTask].slack = taskProp[afterTask].duration - taskProp[afterTask].pd;
 
 	if(strcmp(atvDesc, S_DONE) == 0){
 		printf("duration=%d slack=%d\n", taskProp[afterTask].duration, taskProp[afterTask].slack);
@@ -483,7 +484,9 @@ const char* readTaskAtv(char v[], int start, int max){
 		i++;
 		c = v[i];
 	}
+	printf("temp:%s\n", temp);
 	strcpy(res, temp);
+	printf("res:%s\n", res);
 	return res;
 }
 

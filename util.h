@@ -47,7 +47,8 @@
 #define A_INVALID "invalid description\n"
 #define A_NOTFOUND "no such activity\n"
 /* time-related printf macros */
-#define TIME_INVALID "invalid time \n"
+#define TIME_INVALID "invalid time\n"
+#define NO_ID_M "no such task\n"
 
 /* descriptions and indexes of TO DO, IN PROGRESS and DONE */
 #define TODO 0
