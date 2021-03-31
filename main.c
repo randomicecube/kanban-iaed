@@ -401,30 +401,21 @@ void moveTasks(char read[]){
 	strcpy(taskProp[afterTask].currAtv, atvDesc);
 
 	if(strcmp(temp, S_TODO) == 0){
-		taskProp[afterTask].duration = 0;
-		if(strcmp(atvDesc, S_DONE) != 0){
-			taskProp[afterTask].st = currentTime;
-		}
+		taskProp[afterTask].st = currentTime;		
 	}
 	else{
 		taskProp[afterTask].duration = currentTime - taskProp[afterTask].st;
 	}
 	taskProp[afterTask].slack = taskProp[afterTask].duration - taskProp[afterTask].pd;
 
-	if(strcmp(atvDesc, S_DONE) == 0){
+	if(strcmp(atvDesc, S_DONE) == 0 && strcmp(temp, S_DONE) != 0){
 		printf("duration=%d slack=%d\n", taskProp[afterTask].duration, taskProp[afterTask].slack);
 	}
 
 	return;
 }
 
-
-
-
 /* aux functions*/
-
-
-
 
 /* returns -1 if the ID isn't in the system or its index in the tasks array if it is */
 int anyId(int n, int size, task v[]){
