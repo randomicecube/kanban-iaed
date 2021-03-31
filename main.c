@@ -484,9 +484,7 @@ const char* readTaskAtv(char v[], int start, int max){
 		i++;
 		c = v[i];
 	}
-	printf("temp:%s\n", temp);
 	strcpy(res, temp);
-	printf("res:%s\n", res);
 	return res;
 }
 
