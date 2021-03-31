@@ -120,6 +120,8 @@ void addUser(char read[]){
 	
 	strcpy(temp, "");
 	readUser(read, temp, START, MAX_USERL);
+
+	/* checks if the read username is already in the system */
     if(dupSearch(DUP_USER, temp, amUsers) == 1){
         printf(U_EXISTS);
 		return;
@@ -162,6 +164,7 @@ void addActivity(char read[]){
         }
     }
 
+	/* checks if the description contains lowercase characters */
     for(j = 0; j < (int) strlen(temp); j++){
 		if(islower(temp[j])){
 			printf(A_INVALID);
@@ -204,6 +207,7 @@ void advance(char read[]){
 		}
 		else{
 			if(isdigit((int) c)){
+				/* if it is the first time a digit is being read */
 				if(reading == 0){
 					reading = 1;
 				}
@@ -227,12 +231,13 @@ void listTasks(char read[]){
 	int any;
 	/* contains a temporary value of an ID  */
 	int idTemp = 0;
+	/* amount of id's read in the input */
 	int idCount = 0;
 	/* used in the sorting algorithm - 1 if there were changes made, 0 if not */ 
 	int changed = 1;
 	/* used in the sorting algorihtm, how many "passes" the loop has to do */
 	int cap = amTasks;
-	/* contain an ordered subset of tasks and a general subset of tasks, respectively */
+	/* == 1 if there was an error; used to be able to print an error message later */
 	int erro = 0;
 	task ordered[MAX_TASK] = {0};
 	task tempTask;
@@ -241,7 +246,9 @@ void listTasks(char read[]){
 	while(COND){
 		idTemp = readNumber(read, j);
 		j = getNextIndex(read, j);
+		/* checks if idTemp is an ID in the system */
 		any = anyId(idTemp, amTasks, taskProp);
+		/* if the ID is not in the system */
 		if(any == FAIL){
 			printf(T_NOID, idTemp);
 			erro++;
@@ -258,9 +265,10 @@ void listTasks(char read[]){
 		c = read[j];
 	}
 
+	/* if the command is literally 'l', with nothing else */
 	if(erro == 0 && idCount == 0){
 		memcpy(ordered, taskProp, sizeof(taskProp));
-		/* bubble sort */
+		/* sort all the tasks in the system alphabetically (by their description) */
 		while(changed == 1){
 			changed = 0;
 			for(i = 0; i < cap - 1; i++){
@@ -278,6 +286,7 @@ void listTasks(char read[]){
 	return;
 }
 
+/* prints the tasks currently in a given activity's scope */
 void listAtvTasks(char read[]){
 
 	int i, j = 0, found = 0, index = 0, changed = 1;
@@ -289,19 +298,23 @@ void listAtvTasks(char read[]){
 	strcpy(activity, "");
 	readTaskAtv(read, activity, START, MAX_ATVL);
 
+	/* checks if the activity is in the system */
 	for(j = 0; j < amAtvs && found == 0; j++){
+		/* if it is */
 		if(!strcmp(atvProp[j].desc, activity)){
 			found = 1;
 			wanted = atvProp[j];
 		}
 	}
 
+	/* if the activity is in the system */
 	if(found == 0){
 		printf(A_NOTFOUND);
 		return;
 	}
 	
 	cap = wanted.noTasks;
+	/* stores the tasks in the activity's scope in a to-be-sorted array */
 	for(i = 0; i < amTasks; i++){
 		if(strcmp(taskProp[i].currAtv, wanted.desc) == 0){
 			ordered[index] = taskProp[i];
@@ -309,16 +322,18 @@ void listAtvTasks(char read[]){
 		}
 	}
 	
-	/* bubble sort */
+	/* sorts the array gotten above */
 	while(changed == 1){
 		changed = 0;
 		for(j = 0; j < cap - 1; j++){
+			/* if the first task's starting time is bigger than the next's */
 			if(ordered[j].st > ordered[j + 1].st){
 				tempTask = ordered[j];
 				ordered[j] = ordered[j + 1];
 				ordered[j + 1] = tempTask;
 				changed = 1;
 			}
+			/* if they're equal, it then sorts them alphabetically (by description) */
 			else if(ordered[j].st == ordered[j + 1].st){
 				if(strcmp(ordered[j].desc, ordered[j + 1].desc) > 0){
 					tempTask = ordered[j];
@@ -342,6 +357,7 @@ void listAtvTasks(char read[]){
 	return;
 }
 
+/* moves a Task from an activity to the other; 'm' command */
 void moveTasks(char read[]){
 	int i = START, idTemp = 0, afterAtv, beforeAtv, afterTask;
 	int wrongUser = 0, wrongAtv = 0;
@@ -349,6 +365,8 @@ void moveTasks(char read[]){
 	
 	idTemp = readNumber(read, i);
 	i = getNextIndex(read, i);
+
+	/* checks if the given ID is in the system */
 	if(anyId(idTemp, amTasks, taskProp) == FAIL){
 		printf(NO_ID_M);
 		return;
@@ -357,57 +375,76 @@ void moveTasks(char read[]){
 	strcpy(username, "");
 	readUser(read, username, i, MAX_USERL);
 	i = getNextIndex(read, i);
+
+	/* checks if the given username is in the system */
 	if(dupSearch(DUP_USER, username, amUsers) == ZERO){
 		wrongUser = 1;
 	}
 
 	strcpy(atvDesc, "");
 	readTaskAtv(read, atvDesc, i, MAX_ATVL);
+
+	/* checks if the given activity is in the system */
 	if(dupSearch(DUP_ATV, atvDesc, amAtvs) == ZERO){
 		wrongAtv = 1;
 	}
 
+	/* if the given activity is TO DO */
 	if(strcmp(atvDesc,S_TODO) == 0){
 		printf(T_STARTED);
 		return;
 	}
+
+	/* if the username is not in the system */
 	if(wrongUser == 1){
 		printf(U_NOTFOUND);
 		return;
 	}
+
+	/* if the activity is not in the system */
 	if(wrongAtv == 1){
 		printf(A_NOTFOUND);
 		return;
 	}
 	
+	/* checks in the system which is the task with the given id; stores it */
 	for(i = 0; i < amTasks; i++){
 		if(taskProp[i].id == idTemp){
 			afterTask = i;
 		}
 	}
+
 	strcpy(temp, taskProp[afterTask].currAtv);
 	for(i = 0; i < amAtvs; i++){
+		/* if the "going to" activity is found */
 		if(strcmp(atvDesc, atvProp[i].desc) == 0){
 			afterAtv = i;
 		}
+
+		/* if the "activity being left" is found */
 		else if(strcmp(temp, atvProp[i].desc) == 0){
 			beforeAtv = i;
 		}
 	}
-		
+
+	/* adjusts the number of tasks in the activities found above */	
 	atvProp[beforeAtv].noTasks--;
 	atvProp[afterAtv].noTasks++;
 
 	strcpy(taskProp[afterTask].currAtv, atvDesc);
 
+	/* if the "activity being left" is TO DO, the starting time is adjusted */
 	if(strcmp(temp, S_TODO) == 0){
 		taskProp[afterTask].st = currentTime;		
 	}
+	/* else, the duration is adjusted */
 	else{
 		taskProp[afterTask].duration = currentTime - taskProp[afterTask].st;
 	}
+
 	taskProp[afterTask].slack = taskProp[afterTask].duration - taskProp[afterTask].pd;
 
+	/* the output is only printed if the "activity being left" is not DONE and the "going to" is */
 	if(strcmp(atvDesc, S_DONE) == 0 && strcmp(temp, S_DONE) != 0){
 		printf("duration=%d slack=%d\n", taskProp[afterTask].duration, taskProp[afterTask].slack);
 	}
@@ -429,9 +466,10 @@ int anyId(int n, int size, task v[]){
 }
 
 
-/* aux function, works with pd and id */
+/* aux function, reads a portion of a string and returns the first non negative integer found*/
 int readNumber(char v[], int start){
-	int i = start, reading = 0, res = -1, menos = 0; /* if -1, it never read anything */
+	int i = start, reading = 0, res = FAIL; /* if FAIL, it never read anything */
+	int menos = 0;
 	char c = v[i];
 	while(reading == 0 || !isspace(c)){
 		if(reading == 0 && !isspace(c)){
@@ -453,6 +491,7 @@ int readNumber(char v[], int start){
 	return res;
 }
 
+/* returns the index after the whitespace found after a number/word */
 int getNextIndex(char v[], int start){
 	int i = start, reading = 0;
 	char c = v[i];
@@ -467,6 +506,7 @@ int getNextIndex(char v[], int start){
 	return i;
 }
 
+/* reads a portion of a string and stores the task/activity's description in s */
 void readTaskAtv(char v[], char *s, int start, int max){ 
 	int i = start, index = 0, reading = 0;
 	char c = v[i];
@@ -484,6 +524,7 @@ void readTaskAtv(char v[], char *s, int start, int max){
 	return;
 }
 
+/* reads a portion of a string and stores the username in s */
 void readUser(char v[], char *s, int start, int max){
 	int i = start, index = 0, stop = 0, reading = 0;
 	char c = v[i];
@@ -506,6 +547,7 @@ void readUser(char v[], char *s, int start, int max){
 	return;
 }
 
+/* aux function to listTasks, prints a given array of tasks' set of properties */
 void printTasks(task v[], int n){
 	int i;
 	for(i = 0; i < n; i++){
@@ -514,6 +556,7 @@ void printTasks(task v[], int n){
 	return;
 }
 
+/* checks if a given task, username or activity is a duplicate in the system */
 int dupSearch(char v, char s[], int n){
 	
 	int i, dup = 0;
