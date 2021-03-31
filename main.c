@@ -583,5 +583,3 @@ int dupSearch(char v, char s[], int n){
 	}
 	return dup;
 }
-
-/* comment do pepe */
