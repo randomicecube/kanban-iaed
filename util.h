@@ -28,26 +28,31 @@
 #define FAIL -1
 /* beginning of the timer */
 #define ZERO 0
+/* used in the bubble function */
+#define LT 0
+/* used in the bubble function */
+#define LAT 1
 /* start reading from the input's stream after considering the command character*/
 #define START 2
 
-/* task-related printf macros */
+/* task-related error messages */
 #define T_TOOMANY "too many tasks\n"
 #define T_EXISTS "duplicate description\n"
 #define T_WRITEID "task %d\n"
 #define T_NOID "%d: no such task\n"
 #define T_STARTED "task already started\n"
-#define INV_DUR "invalid duration"
-/* user-related printf macros */
+#define INV_DUR "invalid duration\n"
+#define DURSLACK "duration=%d slack=%d\n"
+/* user-related error messages */
 #define U_TOOMANY "too many users\n"
 #define U_EXISTS "user already exists\n"
 #define U_NOTFOUND "no such user\n"
-/* activity-related printf macros */
+/* activity-related error messages */
 #define A_TOOMANY "too many activities\n"
 #define A_EXISTS "duplicate activity\n"
 #define A_INVALID "invalid description\n"
 #define A_NOTFOUND "no such activity\n"
-/* time-related printf macros */
+/* time-related error messages */
 #define TIME_INVALID "invalid time\n"
 #define NO_ID_M "no such task\n"
 
@@ -58,11 +63,6 @@
 #define S_INPROGRESS "IN PROGRESS"
 #define DONE 2
 #define S_DONE "DONE"
-
-#define DUP_TASK 'T'
-#define DUP_USER 'U'
-#define DUP_ATV 'A'
-
 
 /* -------------------------------------STRUCTS------------------------------------- */
 
@@ -76,6 +76,7 @@ typedef struct task{
     int slack;
     /* stores the task's description */
     char desc[MAX_TASKL];
+    /* stores the description of the activity the task is currently in */
     char currAtv[MAX_ATVL];
 }task;
 
@@ -108,8 +109,11 @@ int readNumber(char v[], int start);
 void readUser(char v[], char *s, int start, int max);
 void readTaskAtv(char v[], char *s, int start, int max);
 int getNextIndex(char v[], int start);
-int dupSearch(char v, char s[], int n);
+int dupTask(char s[], task v[], int n);
+int dupUser(char s[], user v[], int n);
+int dupAtv(char s[], atv v[], int n);
 void printTasks(task v[], int n);
+void bubble(task v[], int cap, int func);
 
 /* -----------------------------------GLOBAL VARS----------------------------------- */
 
