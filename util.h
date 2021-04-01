@@ -37,6 +37,7 @@
 #define T_WRITEID "task %d\n"
 #define T_NOID "%d: no such task\n"
 #define T_STARTED "task already started\n"
+#define INV_DUR "invalid duration"
 /* user-related printf macros */
 #define U_TOOMANY "too many users\n"
 #define U_EXISTS "user already exists\n"
@@ -50,7 +51,7 @@
 #define TIME_INVALID "invalid time\n"
 #define NO_ID_M "no such task\n"
 
-/* descriptions and indexes of TO DO, IN PROGRESS and DONE */
+/* descriptions and indexes of TO DO, IN PROGRESS and DONE, respectively */
 #define TODO 0
 #define S_TODO "TO DO"
 #define INPROGRESS 1
@@ -94,21 +95,14 @@ typedef struct activity{
 
 /* -----------------------------------PROTOTYPES------------------------------------ */
 
-/* adds a task to the system - 't' command */
 void addTask(char read[]);
-/* adds a user to the system/lists all users by creation date - 'u' command */
 void addUser(char read[]);
-/* adds an activity to the system/lists all activities by creation date - 'a' command */
 void addActivity(char read[]);
-/* advances the system's time - 'n' command*/
 void advance(char read[]);
-/* lists all the tasks/a specific subset of tasks in the system - 'l' command */
 void listTasks(char read[]);
-/* lists all the tasks currently in a given activity */
 void listAtvTasks(char read[]);
 void moveTasks(char read[]);
 
-/* checks if a given ID is an ID of any task in the system */
 int anyId(int n, int size, task v[]);
 int readNumber(char v[], int start);
 void readUser(char v[], char *s, int start, int max);
@@ -116,7 +110,6 @@ void readTaskAtv(char v[], char *s, int start, int max);
 int getNextIndex(char v[], int start);
 int dupSearch(char v, char s[], int n);
 void printTasks(task v[], int n);
-int getAtvIndex(atv v[], char s[], int n);
 
 /* -----------------------------------GLOBAL VARS----------------------------------- */
 

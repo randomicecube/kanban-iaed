@@ -90,6 +90,9 @@ void addTask(char read[]){
 		printf(T_EXISTS);
 		return;
 	}
+	else if(pd < 0){
+		printf(INV_DUR);
+	}
 
 	/* copying the input's information + current time into the task array */
 	strcpy(taskProp[amTasks].desc, temp);
