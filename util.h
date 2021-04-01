@@ -4,7 +4,7 @@
  * Description: Program's constants, prototypes, variables, structs.
  */
 
-/* -------------------------------------MACROS-------------------------------------- */
+/* ---------------------------------MACROS---------------------------------- */
 
 /* max users in the system */
 #define MAX_USER 50
@@ -24,7 +24,7 @@
 
 /* condition to stop reading input - the user is done writing */
 #define COND (c != '\0' && c != '\n' && c != EOF)
-/* used in some functions to indicate that the search has failed - no matches */
+/* used in some functions to indicate that the search has failed  */
 #define FAIL -1
 /* beginning of the timer */
 #define ZERO 0
@@ -32,7 +32,7 @@
 #define LT 0
 /* used in the bubble function */
 #define LAT 1
-/* start reading from the input's stream after considering the command character*/
+/* start reading from the input after considering the command character */
 #define START 2
 
 /* task-related error messages */
@@ -64,11 +64,11 @@
 #define DONE 2
 #define S_DONE "DONE"
 
-/* -------------------------------------STRUCTS------------------------------------- */
+/* ---------------------------------STRUCTS--------------------------------- */
 
 /* struct representing an instance of a task, including its properties */
 typedef struct task{
-    /* variables storing the task's predicted duration, starting time, id and actual duration */
+    /* the task's predicted duration, starting time, id and actual duration */
     int pd;
     int st;
     int id;
@@ -94,7 +94,7 @@ typedef struct activity{
     int noTasks;
 }atv;
 
-/* -----------------------------------PROTOTYPES------------------------------------ */
+/* -------------------------------PROTOTYPES-------------------------------- */
 
 void addTask(char read[]);
 void addUser(char read[]);
@@ -115,7 +115,7 @@ int dupAtv(char s[], atv v[], int n);
 void printTasks(task v[], int n);
 void bubble(task v[], int cap, int func);
 
-/* -----------------------------------GLOBAL VARS----------------------------------- */
+/* -------------------------------GLOBAL VARS------------------------------- */
 
 /* the program's current time */
 int currentTime = 0;
