@@ -318,7 +318,7 @@ void moveTasks(char read[]){
 			afterAtv = i; /* if the "going to" activity is found */
 		}
 
-		else if(strcmp(temp, atvProp[i].desc) == 0){ 
+		if(strcmp(temp, atvProp[i].desc) == 0){ 
 			beforeAtv = i; /* if the "activity being left" is found */
 		}
 	}

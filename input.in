@@ -1,0 +1,20 @@
+t 45 comer
+t 90 lavar
+t 40 debug
+t 10 banho
+t 0 lol
+a DEBUG
+u diogo
+m 1 diogo DEBUG
+m 2 diogo DEBUG
+m 3 diogo DONE
+m 4 diogo DEBUG
+m 5 diogo DEBUG
+d DONE
+d DEBUG
+m 4 diogo DEBUG
+m 4 diogo DONE
+n 10
+m 4 diogo DONE
+d DONE
+q
