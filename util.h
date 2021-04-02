@@ -114,6 +114,8 @@ int dupUser(char s[], user v[], int n);
 int dupAtv(char s[], atv v[], int n);
 void printTasks(task v[], int n);
 void bubble(task v[], int cap, int func);
+int printErrors(char atvDesc[], int wUser, int wAtv);
+void update_printMove(int beforeIndex, int afterIndex, int afterT, char beforeA[], char afterA[]);
 
 /* -------------------------------GLOBAL VARS------------------------------- */
 

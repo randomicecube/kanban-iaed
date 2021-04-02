@@ -290,19 +290,8 @@ void moveTasks(char read[]){
 		wrongAtv = 1; /* if the activity isn't in the system */
 	}
 
-	if(strcmp(atvDesc,S_TODO) == 0){ 
-		printf(T_STARTED); /* if the "going to" activity is TO DO */
-		return;
-	}
-
-	if(wrongUser == 1){ 
-		printf(U_NOTFOUND); /* if the username is not in the system */
-		return;
-	}
-
-	if(wrongAtv == 1){ 
-		printf(A_NOTFOUND); /* if the activity is not in the system */
-		return;
+	if(printErrors(atvDesc, wrongUser, wrongAtv) == 1){
+		return; /* stops the function if there were any errors found */
 	}
 	
 	/* checks in the system which is the task with the given id; stores it */
@@ -311,8 +300,8 @@ void moveTasks(char read[]){
 			afterTask = i;
 		}
 	}
-
 	strcpy(temp, taskProp[afterTask].currAtv);
+
 	for(i = 0; i < amAtvs; i++){
 		if(strcmp(atvDesc, atvProp[i].desc) == 0){ 
 			afterAtv = i; /* if the "going to" activity is found */
@@ -323,26 +312,7 @@ void moveTasks(char read[]){
 		}
 	}
 
-	/* adjusts the number of tasks in the activities found above */	
-	atvProp[beforeAtv].noTasks--;
-	atvProp[afterAtv].noTasks++;
-
-	strcpy(taskProp[afterTask].currAtv, atvDesc);
-
-	/* if the "activity being left" is TO DO, the starting time is adjusted */
-	if(strcmp(temp, S_TODO) == 0){
-		taskProp[afterTask].st = currentTime;		
-	}
-	else{ /* else, the duration is adjusted */
-		taskProp[afterTask].duration = currentTime - taskProp[afterTask].st;
-	}
-
-	taskProp[afterTask].slack = taskProp[afterTask].duration - taskProp[afterTask].pd;
-
-	/* only prints if the "activity being left" is not DONE and the "going to" is */
-	if(strcmp(atvDesc, S_DONE) == 0 && strcmp(temp, S_DONE) != 0){
-		printf(DURSLACK, taskProp[afterTask].duration, taskProp[afterTask].slack);
-	}
+	update_printMove(beforeAtv, afterAtv, afterTask, temp, atvDesc);
 	return;
 }
 
@@ -485,7 +455,7 @@ int dupAtv(char s[], atv v[], int amt){
 
 /* sorts a given array of tasks */
 void bubble(task v[], int cap, int func){
-	/* func == ONE -> listTasks; func == ZERO -> listAtvTasks */
+	/* func == LT -> listTasks; func == LAT -> listAtvTasks */
 	int i, changed = 1;
 	task temp;
 	while(changed == 1){
@@ -507,6 +477,48 @@ void bubble(task v[], int cap, int func){
 			}
 		}
 		cap--;
+	}
+	return;
+}
+
+/* aux to moveTasks, prints some of the possible error messages */
+int printErrors(char atvDesc[], int wUser, int wAtv){
+	int error = 0;
+	if(strcmp(atvDesc, S_TODO) == 0){
+		printf(T_STARTED); /* if the "going to" activity is TO DO */
+		error = 1;
+	}
+	else if(wUser == 1){
+		printf(U_NOTFOUND); /* if the username is not in the system */
+		error = 1;
+	}
+	else if(wAtv == 1){
+		printf(A_NOTFOUND); /* if the activity is not in the system */
+		error = 1;
+	}
+	return error;
+}
+
+void update_printMove(int beforeIndex, int afterIndex, int afterT, char beforeA[], char afterA[]){
+	/* adjusts the number of tasks in the activities found above */	
+	atvProp[beforeIndex].noTasks--;
+	atvProp[afterIndex].noTasks++;
+
+	strcpy(taskProp[afterT].currAtv, afterA);
+
+	/* if the "activity being left" is TO DO, the starting time is adjusted */
+	if(strcmp(beforeA, S_TODO) == 0){
+		taskProp[afterT].st = currentTime;		
+	}
+	else{ /* else, the duration is adjusted */
+		taskProp[afterT].duration = currentTime - taskProp[afterT].st;
+	}
+
+	taskProp[afterT].slack = taskProp[afterT].duration - taskProp[afterT].pd;
+
+	/* only prints if the "activity being left" is not DONE and the "going to" is */
+	if(strcmp(afterA, S_DONE) == 0 && strcmp(beforeA, S_DONE) != 0){
+		printf(DURSLACK, taskProp[afterT].duration, taskProp[afterT].slack);
 	}
 	return;
 }
