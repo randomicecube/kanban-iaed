@@ -93,8 +93,7 @@ void addTask(char read[]){
 	strcpy(taskProp[amTasks].currAtv, atvProp[TODO].desc);
 	atvProp[TODO].noTasks++;
 
-	printf(T_WRITEID, taskProp[amTasks].id);
-	amTasks++;
+	printf(T_WRITEID, taskProp[amTasks++].id);
 	return;
 }
 
@@ -111,8 +110,7 @@ void addUser(char read[]){
 		printf(U_TOOMANY);
 	}
 	else if(strcmp(temp, "") != 0){ /* if the system is adding a user */
-    	strcpy(userProp[amUsers].desc, temp);
-        amUsers++;
+    	strcpy(userProp[amUsers++].desc, temp);
  	}
 	else{ /* if the request is to print all usernames */
 		for(j = 0; j < amUsers; j++){
@@ -148,8 +146,7 @@ void addActivity(char read[]){
     	printf(A_TOOMANY); /* if the system can't accept more atvs */
     }
 	else if(strcmp(temp, "") != 0){ 
-    	strcpy(atvProp[amAtvs].desc, temp); /* add activity */
-        amAtvs++;
+    	strcpy(atvProp[amAtvs++].desc, temp); /* add activity */
     }
     else{ 
 		/* list all activities */
@@ -208,7 +205,7 @@ void listTasks(char read[]){
 		}
 		else{
 			/* prints the valid inputs' information */
-			printf("%d %s #%d %s\n", 
+			printf("%d %s #%d %s\n", \
 					taskProp[any].id, \
 					taskProp[any].currAtv, \
 					taskProp[any].pd, \
@@ -253,8 +250,7 @@ void listAtvTasks(char read[]){
 	/* stores the tasks in the activity's scope in a to-be-sorted array */
 	for(i = 0; i < amTasks; i++){
 		if(strcmp(taskProp[i].currAtv, wanted.desc) == 0){
-			ordered[index] = taskProp[i];
-			index++;
+			ordered[index++] = taskProp[i];
 		}
 	}
 	bubble(ordered, cap, LAT);
@@ -461,19 +457,12 @@ void bubble(task v[], int cap, int func){
 	while(changed == 1){
 		changed = 0;
 		for(i = 0; i < cap - 1; i++){
-			if(v[i].st > v[i + 1].st && func == LAT){
+			if((v[i].st > v[i + 1].st && func == LAT) || \
+			(((v[i].st == v[i + 1].st || func == LT))&&(strcmp(v[i].desc, v[i + 1].desc) > 0))){
 				temp = v[i];
 				v[i] = v[i + 1];
 				v[i + 1] = temp;
 				changed = 1;
-			}
-			else if(v[i].st == v[i + 1].st || func == LT){
-				if(strcmp(v[i].desc, v[i + 1].desc) > 0){
-					temp = v[i];
-					v[i] = v[i + 1];
-					v[i + 1] = temp;
-					changed = 1;
-				}
 			}
 		}
 		cap--;
