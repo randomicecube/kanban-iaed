@@ -40,9 +40,10 @@ int main(){
 				listAtvTasks(input);
 				break;
 			case 'a':
-				addActivity(input);				
+				addActivity(input);	
+				break;
 			default:
-				break;	
+				break;
 		}
 		strcpy(input, ""); /* clear the input array for the next input */
 	}while(!state);
@@ -172,7 +173,7 @@ void listTasks(char read[]){
 
 	if(error == 0 && idCount == 0){ /*if the input was literally 'l' */
 		bubble(taskProp, amTasks, LT);
-		printTasks(taskProp, amTasks);
+		printListTasks(taskProp, amTasks);
 	}
 	return;
 }
@@ -181,31 +182,29 @@ void listTasks(char read[]){
 void listAtvTasks(char read[]){
 	int i, j = 0, index = 0, found = 0;
 	char activity[MAX_ATVL] = {'\0'};
-	task ordered[MAX_TASK] = {0};
-	atv wanted;
+	task atvTasks[MAX_TASK] = {0};
+	atv wantedAtv;
 
 	readTaskAtv(read, activity, START, MAX_ATVL);
 	/* checks if the activity is in the system */
 	for(j = 0; j < amAtvs && found == 0; j++){ 
 		if(!strcmp(atvProp[j].desc, activity)){ /* if it is */
 			found = 1;
-			wanted = atvProp[j];
+			wantedAtv = atvProp[j];
 		}
 	}
-	if(found == 0){ /* if the activity isn't in the system */
+	if(!found){ /* if the activity isn't in the system */
 		printf(A_NOTFOUND);
 		return;
 	}
 	/* stores the tasks in the activity's scope in a to-be-sorted array */
 	for(i = 0; i < amTasks; i++){
-		if(strcmp(taskProp[i].currAtv, wanted.desc) == 0){
-			ordered[index++] = taskProp[i];
+		if(!strcmp(taskProp[i].currAtv, wantedAtv.desc)){
+			atvTasks[index++] = taskProp[i];
 		}
 	}
-	bubble(ordered, wanted.noTasks, LAT);
-	for(j = 0; j < wanted.noTasks; j++){
-		printf("%d %d %s\n", ordered[j].id, ordered[j].st, ordered[j].desc);
-	}
+	bubble(atvTasks, wantedAtv.noTasks, LAT);
+	printListAtvTasks(atvTasks, wantedAtv.noTasks);
 	return;
 }
 
@@ -224,15 +223,9 @@ void moveTasks(char read[]){
 	}
 
 	readUser(read, username, i, MAX_USERL);
-	i = getNextIndex(read, i);
-	if(dupSearch(USER, username) == ZERO){ 
-		wrongUser = 1; /* if the username isn't in the system */
-	}
-
-	readTaskAtv(read, afterDesc, i, MAX_ATVL);
-	if(dupSearch(ATV, afterDesc) == ZERO){ 
-		wrongAtv = 1; /* if the activity isn't in the system */
-	}
+	readTaskAtv(read, afterDesc, getNextIndex(read, i), MAX_ATVL);
+	wrongUser = dupSearch(USER, username);
+	wrongAtv = dupSearch(ATV, afterDesc);
 
 	if(printErrorsMove(afterDesc, wrongUser, wrongAtv) == 1){
 		return; /* returns to main if there were any errors found */
@@ -353,10 +346,18 @@ void readUser(char v[], char *s, int start, int max){
 }
 
 /* used in listTasks to print the tasks' information */
-void printTasks(task v[], int n){
+void printListTasks(task v[], int n){
 	int i;
 	for(i = 0; i < n; i++){
 		printf("%d %s #%d %s\n", v[i].id, v[i].currAtv, v[i].pd, v[i].desc);
+	}
+	return;
+}
+
+void printListAtvTasks(task v[], int n){
+	int i;
+	for(i = 0; i < n; i++){
+		printf("%d %d %s\n", v[i].id, v[i].st, v[i].desc);
 	}
 	return;
 }
@@ -414,11 +415,11 @@ int printErrorsMove(char atvDesc[], int wUser, int wAtv){
 		printf(T_STARTED); /* if the "going to" activity is TO DO */
 		error = 1;
 	}
-	else if(wUser == 1){
+	else if(wUser == ZERO){
 		printf(U_NOTFOUND); /* if the username is not in the system */
 		error = 1;
 	}
-	else if(wAtv == 1){
+	else if(wAtv == ZERO){
 		printf(A_NOTFOUND); /* if the activity is not in the system */
 		error = 1;
 	}
