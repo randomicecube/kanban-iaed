@@ -80,6 +80,7 @@ void addTask(char read[]){
 	}
 	else if(pd < 0){ /* if the duration is a negative integer */
 		printf(INV_DUR);
+		return;
 	}
 
 	/* adding the new task's information into the task array */
@@ -127,17 +128,15 @@ void addActivity(char read[]){
     char temp[MAX_ATVL] = {'\0'};
 
 	readTaskAtv(read, temp, START, MAX_ATVL);
-	/* checks if the description is in the system */
-    for(j = 0; j < amAtvs; j++){ 
+    for(j = 0; j < amAtvs; j++){
     	if (strcmp(temp, atvProp[j].desc) == 0){
-        	printf(A_EXISTS);
+        	printf(A_EXISTS); /* if the description is in the system */
 			return;
         }
     }
-	/* checks if there are lowercase characters */
     for(j = 0; j < (int) strlen(temp); j++){ 
 		if(islower(temp[j])){
-			printf(A_INVALID);
+			printf(A_INVALID); /*if a lowercase char is found */
 			return;
 		}
 	}
@@ -149,8 +148,7 @@ void addActivity(char read[]){
     	strcpy(atvProp[amAtvs++].desc, temp); /* add activity */
     }
     else{ 
-		/* list all activities */
-    	for(j = 0; j < amAtvs; j++){ 
+    	for(j = 0; j < amAtvs; j++){ /* list all activities */ 
         	printf("%s\n", atvProp[j].desc);
         }
     }
@@ -186,12 +184,8 @@ void advance(char read[]){
 
 /* lists all the tasks/a subset of tasks in the system - 'l' command */
 void listTasks(char read[]){
-	int j = START;
+	int j = START, idTemp = 0, idCount = 0, error = 0;
 	int any; /* FAIL: no matching id; otherwise, its index in the task array */
-	int idTemp = 0;
-	int idCount = 0; /* amount of ID's read in the input */
-	int cap = amTasks; /* how many passes the loop has to do in bubble */
-	int error = 0; /* how many invalid IDs were in the input */
 	task ordered[MAX_TASK] = {0};
 	char c = read[j];
 
@@ -205,12 +199,8 @@ void listTasks(char read[]){
 		}
 		else{
 			/* prints the valid inputs' information */
-			printf("%d %s #%d %s\n", \
-					taskProp[any].id, \
-					taskProp[any].currAtv, \
-					taskProp[any].pd, \
-					taskProp[any].desc
-					);
+			printf("%d %s #%d %s\n", taskProp[any].id, taskProp[any].currAtv, \
+					taskProp[any].pd, taskProp[any].desc);
 			idCount++;
 		}
 		c = read[j];
@@ -219,7 +209,7 @@ void listTasks(char read[]){
 	if(error == 0 && idCount == 0){ /*if the input was literally 'l' */
 		memcpy(ordered, taskProp, sizeof(taskProp));
 		/* sort all the tasks in the system alphabetically (by description) */
-		bubble(ordered, cap, LT);
+		bubble(ordered, amTasks, LT);
 		printTasks(ordered, amTasks);
 	}
 	return;
@@ -227,9 +217,7 @@ void listTasks(char read[]){
 
 /* prints the tasks currently in a given activity's scope */
 void listAtvTasks(char read[]){
-	int i, j = 0, index = 0;
-	int found = 0; /* stores whether the activity is in the system or not */
-	int cap; /* how many passes the loop has to do in bubble */
+	int i, j = 0, index = 0, found = 0;
 	char activity[MAX_ATVL] = {'\0'};
 	task ordered[MAX_TASK] = {0};
 	atv wanted;
@@ -240,7 +228,6 @@ void listAtvTasks(char read[]){
 		if(!strcmp(atvProp[j].desc, activity)){ /* if it is */
 			found = 1;
 			wanted = atvProp[j];
-			cap = wanted.noTasks;
 		}
 	}
 	if(found == 0){ /* if the activity isn't in the system */
@@ -253,7 +240,7 @@ void listAtvTasks(char read[]){
 			ordered[index++] = taskProp[i];
 		}
 	}
-	bubble(ordered, cap, LAT);
+	bubble(ordered, wanted.noTasks, LAT);
 	for(j = 0; j < wanted.noTasks; j++){
 		printf("%d %d %s\n", ordered[j].id, ordered[j].st, ordered[j].desc);
 	}
@@ -286,28 +273,14 @@ void moveTasks(char read[]){
 		wrongAtv = 1; /* if the activity isn't in the system */
 	}
 
-	if(printErrors(atvDesc, wrongUser, wrongAtv) == 1){
+	if(printErrorsMove(atvDesc, wrongUser, wrongAtv) == 1){
 		return; /* stops the function if there were any errors found */
 	}
 	
-	/* checks in the system which is the task with the given id; stores it */
-	for(i = 0; i < amTasks; i++){
-		if(taskProp[i].id == idTemp){
-			afterTask = i;
-		}
-	}
+	afterTask = findIndexTask(taskProp, idTemp);
+	beforeAtv = findIndexAtv(atvProp, taskProp[afterTask].currAtv);
+	afterAtv = findIndexAtv(atvProp, atvDesc);
 	strcpy(temp, taskProp[afterTask].currAtv);
-
-	for(i = 0; i < amAtvs; i++){
-		if(strcmp(atvDesc, atvProp[i].desc) == 0){ 
-			afterAtv = i; /* if the "going to" activity is found */
-		}
-
-		if(strcmp(temp, atvProp[i].desc) == 0){ 
-			beforeAtv = i; /* if the "activity being left" is found */
-		}
-	}
-
 	update_printMove(beforeAtv, afterAtv, afterTask, temp, atvDesc);
 	return;
 }
@@ -471,7 +444,7 @@ void bubble(task v[], int cap, int func){
 }
 
 /* aux to moveTasks, prints some of the possible error messages */
-int printErrors(char atvDesc[], int wUser, int wAtv){
+int printErrorsMove(char atvDesc[], int wUser, int wAtv){
 	int error = 0;
 	if(strcmp(atvDesc, S_TODO) == 0){
 		printf(T_STARTED); /* if the "going to" activity is TO DO */
@@ -488,11 +461,34 @@ int printErrors(char atvDesc[], int wUser, int wAtv){
 	return error;
 }
 
+/* returns the index in taskProp of the task with the given ID */
+int findIndexTask(task v[], int idTemp){
+	int i, res = 0, found = 0;
+	for(i = 0; i < amTasks && found == 0; i++){
+		if(v[i].id == idTemp){
+			res = i;
+			found++;
+		}
+	}
+	return res;
+}
+
+/* returns the index in atvProp of the activity with the given description */
+int findIndexAtv(atv v[], char description[]){
+	int i, res = 0, found = 0;
+	for(i = 0; i < amAtvs && found == 0; i++){
+		if(strcmp(description, v[i].desc) == 0){
+			res = i;
+			found++;
+		}
+	}
+	return res;
+}
+
 void update_printMove(int beforeIndex, int afterIndex, int afterT, char beforeA[], char afterA[]){
 	/* adjusts the number of tasks in the activities found above */	
 	atvProp[beforeIndex].noTasks--;
 	atvProp[afterIndex].noTasks++;
-
 	strcpy(taskProp[afterT].currAtv, afterA);
 
 	/* if the "activity being left" is TO DO, the starting time is adjusted */

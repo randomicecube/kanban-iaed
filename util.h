@@ -35,7 +35,7 @@
 /* start reading from the input after considering the command character */
 #define START 2
 
-/* task-related error messages */
+/* task-related print and error messages */
 #define T_TOOMANY "too many tasks\n"
 #define T_EXISTS "duplicate description\n"
 #define T_WRITEID "task %d\n"
@@ -43,11 +43,11 @@
 #define T_STARTED "task already started\n"
 #define INV_DUR "invalid duration\n"
 #define DURSLACK "duration=%d slack=%d\n"
-/* user-related error messages */
+/* user-related print and error messages */
 #define U_TOOMANY "too many users\n"
 #define U_EXISTS "user already exists\n"
 #define U_NOTFOUND "no such user\n"
-/* activity-related error messages */
+/* activity-related print and error messages */
 #define A_TOOMANY "too many activities\n"
 #define A_EXISTS "duplicate activity\n"
 #define A_INVALID "invalid description\n"
@@ -114,7 +114,9 @@ int dupUser(char s[], user v[], int n);
 int dupAtv(char s[], atv v[], int n);
 void printTasks(task v[], int n);
 void bubble(task v[], int cap, int func);
-int printErrors(char atvDesc[], int wUser, int wAtv);
+int printErrorsMove(char atvDesc[], int wUser, int wAtv);
+int findIndexTask(task v[], int id);
+int findIndexAtv(atv v[], char desc[]);
 void update_printMove(int beforeIndex, int afterIndex, int afterT, char beforeA[], char afterA[]);
 
 /* -------------------------------GLOBAL VARS------------------------------- */
