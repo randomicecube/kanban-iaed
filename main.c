@@ -14,21 +14,12 @@
 int main(){
 	char input[MAX_LENGTH];
 	int state = 0; /* at 0 the program keeps running, at 1 it stops */
-
-	/* starting the 3 initial activities */
-	strcpy(atvProp[TODO].desc, S_TODO);
-	atvProp[TODO].noTasks = 0;
-	strcpy(atvProp[INPROGRESS].desc, S_INPROGRESS);
-	atvProp[INPROGRESS].noTasks = 0;
-	strcpy(atvProp[DONE].desc, S_DONE);
-	atvProp[DONE].noTasks = 0;
-	amAtvs += 3; /* activity count after adding the 3 atvs above*/
-
+	start();
 	do{
 		fgets(input, MAX_LENGTH, stdin);
 		switch(input[0]){
 			case 'q':
-				state = 1;
+				state++;
 				break;
 			case 't':
 				addTask(input);
@@ -73,7 +64,7 @@ void addTask(char read[]){
 	index = getNextIndex(read, START);
 
 	readTaskAtv(read, temp, index, MAX_TASKL); /* reading description */	
-	if(dupTask(temp, taskProp, amTasks) == 1){ /* if it already exists */
+	if(dupSearch(TASK, temp) == 1){ /* if it already exists */
 		printf(T_EXISTS);
 		return;
 	}
@@ -92,7 +83,7 @@ void addUser(char read[]){
     char temp[MAX_USERL] = {'\0'};
 	
 	readUser(read, temp, START, MAX_USERL); /* reading description */
-    if(dupUser(temp, userProp, amUsers) == 1){ /* if it already exists */
+    if(dupSearch(USER, temp) == 1){ /* if it already exists */
         printf(U_EXISTS);
     }
 	else if(amUsers == MAX_USER){ /* if the system can't accept more users */
@@ -159,9 +150,7 @@ void advance(char read[]){
 
 /* lists all the tasks/a subset of tasks in the system - 'l' command */
 void listTasks(char read[]){
-	int j = START, idTemp = 0, idCount = 0, error = 0;
-	int any; /* FAIL: no matching id; otherwise, its index in the task array */
-	task ordered[MAX_TASK] = {0};
+	int j = START, idTemp = 0, idCount = 0, error = 0, any;
 	char c = read[j];
 
 	while(COND){
@@ -170,10 +159,10 @@ void listTasks(char read[]){
 		any = anyId(idTemp, amTasks, taskProp);
 		if(any == FAIL){ /* if the ID is not in the system */
 			printf(T_NOID, idTemp);
-			error++;
+			error = 1;
 		}
 		else{
-			/* prints the valid inputs' information */
+			/* prints the input's information if it was valid*/
 			printf("%d %s #%d %s\n", taskProp[any].id, taskProp[any].currAtv, \
 					taskProp[any].pd, taskProp[any].desc);
 			idCount++;
@@ -182,10 +171,8 @@ void listTasks(char read[]){
 	}
 
 	if(error == 0 && idCount == 0){ /*if the input was literally 'l' */
-		memcpy(ordered, taskProp, sizeof(taskProp));
-		/* sort all the tasks in the system alphabetically (by description) */
-		bubble(ordered, amTasks, LT);
-		printTasks(ordered, amTasks);
+		bubble(taskProp, amTasks, LT);
+		printTasks(taskProp, amTasks);
 	}
 	return;
 }
@@ -238,12 +225,12 @@ void moveTasks(char read[]){
 
 	readUser(read, username, i, MAX_USERL);
 	i = getNextIndex(read, i);
-	if(dupUser(username, userProp, amUsers) == ZERO){ 
+	if(dupSearch(USER, username) == ZERO){ 
 		wrongUser = 1; /* if the username isn't in the system */
 	}
 
 	readTaskAtv(read, afterDesc, i, MAX_ATVL);
-	if(dupAtv(afterDesc, atvProp, amAtvs) == ZERO){ 
+	if(dupSearch(ATV, afterDesc) == ZERO){ 
 		wrongAtv = 1; /* if the activity isn't in the system */
 	}
 
@@ -260,6 +247,18 @@ void moveTasks(char read[]){
 }
 
 /* ------------------------------AUX FUNCTIONS------------------------------ */
+
+void start(){
+	/* starting the 3 initial activities */
+	strcpy(atvProp[TODO].desc, S_TODO);
+	atvProp[TODO].noTasks = 0;
+	strcpy(atvProp[INPROGRESS].desc, S_INPROGRESS);
+	atvProp[INPROGRESS].noTasks = 0;
+	strcpy(atvProp[DONE].desc, S_DONE);
+	atvProp[DONE].noTasks = 0;
+	amAtvs += 3; /* activity count after adding the 3 atvs above*/
+	return;
+}
 
 /* FAIL if the ID isn't in the system; its index in the tasks array if it is */
 int anyId(int n, int size, task v[]){
@@ -362,35 +361,27 @@ void printTasks(task v[], int n){
 	return;
 }
 
-/* checks if a given (task) description already exists in the system */
-int dupTask(char s[], task v[], int amt){
+/* checks if a given description already exists in the system */
+int dupSearch(char mode, char s[]){
 	int i, dup = 0;
-	for(i = 0; i < amt; i++){
-		if(strcmp(s, v[i].desc) == 0){
-			dup = 1;
-		}
-	}
-	return dup;
-}
-
-/* checks if a given (user) description already exists in the system */
-int dupUser(char s[], user v[], int amt){
-	int i, dup = 0;
-	for(i = 0; i < amt; i++){
-		if(strcmp(s, v[i].desc) == 0){
-			dup = 1;
-		}
-	}
-	return dup;
-}
-
-/* checks if a given (activity) description already exists in the system */
-int dupAtv(char s[], atv v[], int amt){
-	int i, dup = 0;
-	for(i = 0; i < amt; i++){
-		if(strcmp(s, v[i].desc) == 0){
-			dup = 1;
-		}
+	switch(mode){
+		case TASK: /* comparing task descriptions */
+			for(i = 0; i < amTasks && dup == 0; i++){
+				if(strcmp(s, taskProp[i].desc) == 0) dup++;
+			}
+			break;
+		case USER: /* comparing user descriptions */
+			for(i = 0; i < amUsers && dup == 0; i++){
+				if(strcmp(s, userProp[i].desc) == 0) dup++;
+			}
+			break;
+		case ATV: /* comparing activity descriptions */
+			for(i = 0; i < amAtvs && dup == 0; i++){
+				if(strcmp(s, atvProp[i].desc) == 0) dup++;
+			}
+			break;
+		default:
+			break;
 	}
 	return dup;
 }

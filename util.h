@@ -63,6 +63,11 @@
 #define DONE 2
 #define S_DONE "DONE"
 
+/* modes - finding duplicates */
+#define TASK 'T'
+#define USER 'U'
+#define ATV 'A'
+
 /* ---------------------------------STRUCTS--------------------------------- */
 
 /* struct representing an instance of a task, including its properties */
@@ -103,14 +108,13 @@ void listTasks(char read[]);
 void listAtvTasks(char read[]);
 void moveTasks(char read[]);
 
+void start();
 int anyId(int n, int size, task v[]);
 int readNumber(char v[], int start);
 void readUser(char v[], char *s, int start, int max);
 void readTaskAtv(char v[], char *s, int start, int max);
 int getNextIndex(char v[], int start);
-int dupTask(char s[], task v[], int n);
-int dupUser(char s[], user v[], int n);
-int dupAtv(char s[], atv v[], int n);
+int dupSearch(char mode, char s[]);
 void printTasks(task v[], int n);
 void bubble(task v[], int cap, int func);
 int printErrorsMove(char atvDesc[], int wUser, int wAtv);
