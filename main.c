@@ -61,8 +61,7 @@ int main(){
 
 /* adds a task to the system - 't' command */
 void addTask(char read[]){
-	int index; /* index of the character being read */
-	int pd = 0; /* predicted duration */
+	int index, pd = 0; /* index of the character being read, pred. duration */
 	char temp[MAX_TASKL] = {'\0'};
 
 	if(amTasks == MAX_TASK){ /* the system cannot accept more tasks */
@@ -83,18 +82,7 @@ void addTask(char read[]){
 		return;
 	}
 
-	/* adding the new task's information into the task array */
-	strcpy(taskProp[amTasks].desc, temp);
-	taskProp[amTasks].pd = pd;
-	taskProp[amTasks].st = 0;
-	taskProp[amTasks].duration = 0;
-	taskProp[amTasks].id = amTasks + 1; /* id always 1 ahead of amTasks */
-
-	/* tasks always start in the TO DO activity */
-	strcpy(taskProp[amTasks].currAtv, atvProp[TODO].desc);
-	atvProp[TODO].noTasks++;
-
-	printf(T_WRITEID, taskProp[amTasks++].id);
+	updateTaskVec(temp, pd);
 	return;
 }
 
@@ -128,22 +116,9 @@ void addActivity(char read[]){
     char temp[MAX_ATVL] = {'\0'};
 
 	readTaskAtv(read, temp, START, MAX_ATVL);
-    for(j = 0; j < amAtvs; j++){
-    	if (strcmp(temp, atvProp[j].desc) == 0){
-        	printf(A_EXISTS); /* if the description is in the system */
-			return;
-        }
-    }
-    for(j = 0; j < (int) strlen(temp); j++){ 
-		if(islower(temp[j])){
-			printf(A_INVALID); /*if a lowercase char is found */
-			return;
-		}
+    if(findErrorAddAtv(temp) == FAIL){
+		return;
 	}
-
-    if(amAtvs == MAX_ATV && strcmp(temp, "") != 0){ 
-    	printf(A_TOOMANY); /* if the system can't accept more atvs */
-    }
 	else if(strcmp(temp, "") != 0){ 
     	strcpy(atvProp[amAtvs++].desc, temp); /* add activity */
     }
@@ -249,13 +224,12 @@ void listAtvTasks(char read[]){
 
 /* moves a Task from an activity to the other; 'm' command */
 void moveTasks(char read[]){
-	int i = START, idTemp = 0, afterAtv, beforeAtv, afterTask;
-	int wrongUser = 0, wrongAtv = 0;
-	char username[MAX_USERL] = {'\0'}, atvDesc[MAX_ATVL] = {'\0'};
+	int i, idTemp, afterAtv, beforeAtv, afterTask, wrongUser = 0, wrongAtv = 0;
+	char username[MAX_USERL] = {'\0'}, afterDesc[MAX_ATVL] = {'\0'};
 	char temp[MAX_ATVL] = {'\0'};
 	
-	idTemp = readNumber(read, i);
-	i = getNextIndex(read, i);
+	idTemp = readNumber(read, START);
+	i = getNextIndex(read, START);
 
 	if(anyId(idTemp, amTasks, taskProp) == FAIL){ 
 		printf(NO_ID_M); /* if the ID isn't in the system */
@@ -268,20 +242,20 @@ void moveTasks(char read[]){
 		wrongUser = 1; /* if the username isn't in the system */
 	}
 
-	readTaskAtv(read, atvDesc, i, MAX_ATVL);
-	if(dupAtv(atvDesc, atvProp, amAtvs) == ZERO){ 
+	readTaskAtv(read, afterDesc, i, MAX_ATVL);
+	if(dupAtv(afterDesc, atvProp, amAtvs) == ZERO){ 
 		wrongAtv = 1; /* if the activity isn't in the system */
 	}
 
-	if(printErrorsMove(atvDesc, wrongUser, wrongAtv) == 1){
-		return; /* stops the function if there were any errors found */
+	if(printErrorsMove(afterDesc, wrongUser, wrongAtv) == 1){
+		return; /* returns to main if there were any errors found */
 	}
 	
 	afterTask = findIndexTask(taskProp, idTemp);
-	beforeAtv = findIndexAtv(atvProp, taskProp[afterTask].currAtv);
-	afterAtv = findIndexAtv(atvProp, atvDesc);
 	strcpy(temp, taskProp[afterTask].currAtv);
-	update_printMove(beforeAtv, afterAtv, afterTask, temp, atvDesc);
+	beforeAtv = findIndexAtv(atvProp, temp);
+	afterAtv = findIndexAtv(atvProp, afterDesc);
+	update_printMove(beforeAtv, afterAtv, afterTask, temp, afterDesc);
 	return;
 }
 
@@ -297,7 +271,6 @@ int anyId(int n, int size, task v[]){
 	}
 	return res;
 }
-
 
 /* reads a portion of a string and returns the first integer found*/
 int readNumber(char v[], int start){
@@ -485,6 +458,7 @@ int findIndexAtv(atv v[], char description[]){
 	return res;
 }
 
+/* updates and print (if applicable) information regarding atvs/tasks involved in moveTasks */
 void update_printMove(int beforeIndex, int afterIndex, int afterT, char beforeA[], char afterA[]){
 	/* adjusts the number of tasks in the activities found above */	
 	atvProp[beforeIndex].noTasks--;
@@ -506,4 +480,41 @@ void update_printMove(int beforeIndex, int afterIndex, int afterT, char beforeA[
 		printf(DURSLACK, taskProp[afterT].duration, taskProp[afterT].slack);
 	}
 	return;
+}
+
+/* updates and prints messages related to the addTask function */
+void updateTaskVec(char desc[], int pd){
+	strcpy(taskProp[amTasks].desc, desc);
+	taskProp[amTasks].pd = pd;
+	taskProp[amTasks].st = 0;
+	taskProp[amTasks].duration = 0;
+	taskProp[amTasks].id = amTasks + 1;
+
+	strcpy(taskProp[amTasks].currAtv, S_TODO);
+	atvProp[TODO].noTasks++;
+
+	printf(T_WRITEID, taskProp[amTasks++].id);
+	return;
+}
+
+int findErrorAddAtv(char desc[]){
+	int j;
+	for(j = 0; j < amAtvs; j++){
+    	if (strcmp(desc, atvProp[j].desc) == 0){
+        	printf(A_EXISTS); /* if the description is in the system */
+			return FAIL;
+        }
+    }
+    for(j = 0; j < (int) strlen(desc); j++){ 
+		if(islower(desc[j])){
+			printf(A_INVALID); /*if a lowercase char is found */
+			return FAIL;
+		}
+	}
+
+    if(amAtvs == MAX_ATV && strcmp(desc, "") != 0){ 
+    	printf(A_TOOMANY); /* if the system can't accept more atvs */
+		return FAIL;
+    }
+	return ZERO;
 }

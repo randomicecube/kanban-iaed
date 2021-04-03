@@ -26,7 +26,6 @@
 #define COND (c != '\0' && c != '\n' && c != EOF)
 /* used in some functions to indicate that the search has failed  */
 #define FAIL -1
-/* beginning of the timer */
 #define ZERO 0
 /* used in the bubble function */
 #define LT 0
@@ -118,6 +117,8 @@ int printErrorsMove(char atvDesc[], int wUser, int wAtv);
 int findIndexTask(task v[], int id);
 int findIndexAtv(atv v[], char desc[]);
 void update_printMove(int beforeIndex, int afterIndex, int afterT, char beforeA[], char afterA[]);
+void updateTaskVec(char desc[], int pd);
+int findErrorAddAtv(char desc[]);
 
 /* -------------------------------GLOBAL VARS------------------------------- */
 
