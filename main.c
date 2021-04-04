@@ -10,41 +10,13 @@
 #include <string.h>
 #include "util.h"
 
-/* main program's function */
+/* main program function */
 int main(){
 	char input[MAX_LENGTH];
-	int state = 0; /* at 0 the program keeps running, at 1 it stops */
 	start();
 	do{
 		fgets(input, MAX_LENGTH, stdin);
-		switch(input[0]){
-			case 'q':
-				state++;
-				break;
-			case 't':
-				addTask(input);
-				break;
-			case 'l':
-				listTasks(input);
-				break;
-			case 'n':
-				advance(input);
-				break;
-			case 'u':
-				addUser(input);
-				break;
-			case 'm':
-				moveTasks(input);
-				break;
-			case 'd':
-				listAtvTasks(input);
-				break;
-			case 'a':
-				addActivity(input);	
-				break;
-			default:
-				break;
-		}
+		redirectCommand(input);
 		strcpy(input, ""); /* clear the input array for the next input */
 	}while(!state);
 
@@ -65,7 +37,7 @@ void addTask(char read[]){
 	index = getNextIndex(read, START);
 
 	readTaskAtv(read, temp, index, MAX_TASKL); /* reading description */	
-	if(dupSearch(TASK, temp) == 1){ /* if it already exists */
+	if(dupSearch(TASK, temp)){ /* if it already exists */
 		printf(T_EXISTS);
 		return;
 	}
@@ -84,13 +56,13 @@ void addUser(char read[]){
     char temp[MAX_USERL] = {'\0'};
 	
 	readUser(read, temp, START, MAX_USERL); /* reading description */
-    if(dupSearch(USER, temp) == 1){ /* if it already exists */
+    if(dupSearch(USER, temp)){ /* if it already exists */
         printf(U_EXISTS);
     }
 	else if(amUsers == MAX_USER){ /* if the system can't accept more users */
 		printf(U_TOOMANY);
 	}
-	else if(strcmp(temp, "") != 0){ /* if the system is adding a user */
+	else if(strcmp(temp, "")){ /* if the system is adding a user */
     	strcpy(userProp[amUsers++].desc, temp);
  	}
 	else{ /* if the request is to print all usernames */
@@ -101,7 +73,6 @@ void addUser(char read[]){
 	return;
 }
 
-
 /* adds an activity to the system/lists all activities - 'a' command */
 void addActivity(char read[]){
 	int j;
@@ -111,7 +82,7 @@ void addActivity(char read[]){
     if(findErrorAddAtv(temp) == FAIL){
 		return;
 	}
-	else if(strcmp(temp, "") != 0){ 
+	else if(strcmp(temp, "")){ 
     	strcpy(atvProp[amAtvs++].desc, temp); /* add activity */
     }
     else{ 
@@ -135,7 +106,7 @@ void advance(char read[]){
 			return;
 		}
 		else{
-			if(reading == 0){ /* a digit is being read for the first time */
+			if(!reading){ /* a digit is being read for the first time */
 				reading = 1;
 			}
 			time = time * 10 + (c - '0');
@@ -171,14 +142,14 @@ void listTasks(char read[]){
 		c = read[j];
 	}
 
-	if(error == 0 && idCount == 0){ /*if the input was literally 'l' */
+	if(!error && !idCount){ /*if the input was literally 'l' */
 		bubble(taskProp, amTasks, LT);
 		printListTasks(taskProp, amTasks);
 	}
 	return;
 }
 
-/* prints the tasks currently in a given activity's scope */
+/* prints the tasks currently in a given activity's scope - 'd' command */
 void listAtvTasks(char read[]){
 	int i, j = 0, index = 0, found = 0;
 	char activity[MAX_ATVL] = {'\0'};
@@ -211,8 +182,7 @@ void listAtvTasks(char read[]){
 /* moves a Task from an activity to the other; 'm' command */
 void moveTasks(char read[]){
 	int i, idTemp, afterAtv, beforeAtv, afterTask, wrongUser = 0, wrongAtv = 0;
-	char username[MAX_USERL] = {'\0'}, afterDesc[MAX_ATVL] = {'\0'};
-	char temp[MAX_ATVL] = {'\0'};
+	char username[MAX_USERL] = {'\0'}, afterDesc[MAX_ATVL] = {'\0'}, temp[MAX_ATVL] = {'\0'};
 	
 	idTemp = readNumber(read, START);
 	i = getNextIndex(read, START);
@@ -227,7 +197,7 @@ void moveTasks(char read[]){
 	wrongUser = dupSearch(USER, username);
 	wrongAtv = dupSearch(ATV, afterDesc);
 
-	if(printErrorsMove(afterDesc, wrongUser, wrongAtv) == 1){
+	if(printErrorsMove(afterDesc, wrongUser, wrongAtv)){
 		return; /* returns to main if there were any errors found */
 	}
 	
@@ -241,6 +211,7 @@ void moveTasks(char read[]){
 
 /* ------------------------------AUX FUNCTIONS------------------------------ */
 
+/* starts the 3 "default" activities */
 void start(){
 	/* starting the 3 initial activities */
 	strcpy(atvProp[TODO].desc, S_TODO);
@@ -250,6 +221,36 @@ void start(){
 	strcpy(atvProp[DONE].desc, S_DONE);
 	atvProp[DONE].noTasks = 0;
 	amAtvs += 3; /* activity count after adding the 3 atvs above*/
+	return;
+}
+
+/* redirects the program to a specific function, depending on the command */
+void redirectCommand(char input[]){
+	switch(input[0]){ /* we know the command character is always the first */
+		case 'q':
+			state++;
+			break;
+		case 't':
+			addTask(input);
+			break;
+		case 'l':
+			listTasks(input);
+			break;
+		case 'n':
+			advance(input);
+			break;
+		case 'u':
+			addUser(input);
+			break;
+		case 'm':
+			moveTasks(input);
+			break;
+		case 'd':
+			listAtvTasks(input);
+			break;
+		case 'a':
+			addActivity(input); /* default not needed, command always right */
+	}
 	return;
 }
 
@@ -289,30 +290,15 @@ int readNumber(char v[], int start){
 	return res;
 }
 
-/* returns the  v's index after the whitespace found after a number/word */
-int getNextIndex(char v[], int start){
-	int i = start, reading = 0;
-	char c = v[i];
-	while(reading == 0 || !isspace(c)){
-		if(reading == 0 && !isspace(c)){
-			reading = 1;
-		}
-		i++;
-		c = v[i];
-	}
-	i++;
-	return i;
-}
-
 /* reads a portion of a string and stores the description in s */
 void readTaskAtv(char v[], char *s, int start, int max){ 
 	int i = start, index = 0, reading = 0;
 	char c = v[i];
 	while(COND && index < max){
-		if (reading == 0 && !isspace(c)){
-			reading = 1;
+		if (!reading && !isspace(c)){
+			reading++;
 		}
-		if(reading == 1){
+		if(reading){
 			s[index] = c;
 			index++;
 		}
@@ -326,13 +312,13 @@ void readTaskAtv(char v[], char *s, int start, int max){
 void readUser(char v[], char *s, int start, int max){
 	int i = start, index = 0, stop = 0, reading = 0;
 	char c = v[i];
-	while(COND && index < max && stop == 0){
+	while(COND && index < max && !stop){
 		if(reading == 0 && !isspace(c)){
-			reading = 1;
+			reading++;
 		}
-		if(reading == 1){
+		if(reading){
 			if(isspace(c)){
-				stop = 1;
+				stop++;
 			}
 			else{
 				s[index] = c;
@@ -345,6 +331,21 @@ void readUser(char v[], char *s, int start, int max){
 	return;
 }
 
+/* returns the v's index after the whitespace found after a number/word */
+int getNextIndex(char v[], int start){
+	int i = start, reading = 0;
+	char c = v[i];
+	while(!reading || !isspace(c)){
+		if(!reading && !isspace(c)){
+			reading++;
+		}
+		i++;
+		c = v[i];
+	}
+	i++;
+	return i;
+}
+
 /* used in listTasks to print the tasks' information */
 void printListTasks(task v[], int n){
 	int i;
@@ -354,6 +355,7 @@ void printListTasks(task v[], int n){
 	return;
 }
 
+/* used in listAtvTasks to print the tasks' information */
 void printListAtvTasks(task v[], int n){
 	int i;
 	for(i = 0; i < n; i++){
@@ -392,15 +394,16 @@ void bubble(task v[], int cap, int func){
 	/* func == LT -> listTasks; func == LAT -> listAtvTasks */
 	int i, changed = 1;
 	task temp;
-	while(changed == 1){
+	while(changed){
 		changed = 0;
 		for(i = 0; i < cap - 1; i++){
 			if((v[i].st > v[i + 1].st && func == LAT) || \
-			(((v[i].st == v[i + 1].st || func == LT))&&(strcmp(v[i].desc, v[i + 1].desc) > 0))){
+			(((v[i].st == v[i + 1].st || func == LT))&& \
+			(strcmp(v[i].desc, v[i + 1].desc) > 0))){
 				temp = v[i];
 				v[i] = v[i + 1];
 				v[i + 1] = temp;
-				changed = 1;
+				changed++;
 			}
 		}
 		cap--;
@@ -411,17 +414,17 @@ void bubble(task v[], int cap, int func){
 /* aux to moveTasks, prints some of the possible error messages */
 int printErrorsMove(char atvDesc[], int wUser, int wAtv){
 	int error = 0;
-	if(strcmp(atvDesc, S_TODO) == 0){
+	if(!strcmp(atvDesc, S_TODO)){
 		printf(T_STARTED); /* if the "going to" activity is TO DO */
-		error = 1;
+		error++;
 	}
 	else if(wUser == ZERO){
 		printf(U_NOTFOUND); /* if the username is not in the system */
-		error = 1;
+		error++;
 	}
 	else if(wAtv == ZERO){
 		printf(A_NOTFOUND); /* if the activity is not in the system */
-		error = 1;
+		error++;
 	}
 	return error;
 }
@@ -429,7 +432,7 @@ int printErrorsMove(char atvDesc[], int wUser, int wAtv){
 /* returns the index in taskProp of the task with the given ID */
 int findIndexTask(task v[], int idTemp){
 	int i, res = 0, found = 0;
-	for(i = 0; i < amTasks && found == 0; i++){
+	for(i = 0; i < amTasks && !found; i++){
 		if(v[i].id == idTemp){
 			res = i;
 			found++;
@@ -441,7 +444,7 @@ int findIndexTask(task v[], int idTemp){
 /* returns the index in atvProp of the activity with the given description */
 int findIndexAtv(atv v[], char description[]){
 	int i, res = 0, found = 0;
-	for(i = 0; i < amAtvs && found == 0; i++){
+	for(i = 0; i < amAtvs && !found; i++){
 		if(strcmp(description, v[i].desc) == 0){
 			res = i;
 			found++;
@@ -458,7 +461,7 @@ void update_printMove(int beforeIndex, int afterIndex, int afterT, char beforeA[
 	strcpy(taskProp[afterT].currAtv, afterA);
 
 	/* if the "activity being left" is TO DO, the starting time is adjusted */
-	if(strcmp(beforeA, S_TODO) == 0){
+	if(!strcmp(beforeA, S_TODO)){
 		taskProp[afterT].st = currentTime;		
 	}
 	else{ /* else, the duration is adjusted */
@@ -468,7 +471,7 @@ void update_printMove(int beforeIndex, int afterIndex, int afterT, char beforeA[
 	taskProp[afterT].slack = taskProp[afterT].duration - taskProp[afterT].pd;
 
 	/* only prints if the "activity being left" is not DONE and the "going to" is */
-	if(strcmp(afterA, S_DONE) == 0 && strcmp(beforeA, S_DONE) != 0){
+	if(!strcmp(afterA, S_DONE) && strcmp(beforeA, S_DONE)){
 		printf(DURSLACK, taskProp[afterT].duration, taskProp[afterT].slack);
 	}
 	return;
@@ -489,10 +492,11 @@ void updateTaskVec(char desc[], int pd){
 	return;
 }
 
+/* finds errors in addActivity */
 int findErrorAddAtv(char desc[]){
 	int j;
 	for(j = 0; j < amAtvs; j++){
-    	if (strcmp(desc, atvProp[j].desc) == 0){
+    	if (!strcmp(desc, atvProp[j].desc)){
         	printf(A_EXISTS); /* if the description is in the system */
 			return FAIL;
         }
@@ -504,7 +508,7 @@ int findErrorAddAtv(char desc[]){
 		}
 	}
 
-    if(amAtvs == MAX_ATV && strcmp(desc, "") != 0){ 
+    if(amAtvs == MAX_ATV && strcmp(desc, "")){ 
     	printf(A_TOOMANY); /* if the system can't accept more atvs */
 		return FAIL;
     }

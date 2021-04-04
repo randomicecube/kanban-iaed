@@ -109,6 +109,7 @@ void listAtvTasks(char read[]);
 void moveTasks(char read[]);
 
 void start();
+void redirectCommand(char input[]);
 int anyId(int n, int size, task v[]);
 int readNumber(char v[], int start);
 void readUser(char v[], char *s, int start, int max);
@@ -141,3 +142,7 @@ atv atvProp[MAX_ATV];
 int amTasks = 0;
 int amUsers = 0;
 int amAtvs = 0;
+
+/* at 0 the program keeps running, at 1 it stops */
+int state = 0;
+
