@@ -99,8 +99,7 @@ void addActivity(char read[]){
 
 /* advances the system's time - 'n' command*/
 void advance(char read[]){
-	int time = 0;
-	time = readNumber(read, START);
+	int time = readNumber(read, START);
 	if(time < 0){
 		printf(TIME_INVALID);
 		return;
@@ -121,7 +120,7 @@ void listTasks(char read[]){
 		any = anyId(idTemp, amTasks, taskProp);
 		if(any == FAIL){ /* if the ID is not in the system */
 			printf(T_NOID, idTemp);
-			error = 1;
+			error++;
 		}
 		else{
 			/* prints the input's information if it was valid*/
@@ -150,7 +149,7 @@ void listAtvTasks(char read[]){
 	/* checks if the activity is in the system */
 	for(j = 0; j < amAtvs && found == 0; j++){ 
 		if(!strcmp(atvProp[j].desc, activity)){ /* if it is */
-			found = 1;
+			found++;
 			wantedAtv = atvProp[j];
 		}
 	}
@@ -218,7 +217,7 @@ void start(){
 void redirectCommand(char input[]){
 	switch(input[0]){ /* we know the command character is always the first */
 		case 'q':
-			state++;
+			endProgram();
 			break;
 		case 't':
 			addTask(input);
@@ -259,7 +258,7 @@ int anyId(int n, int size, task v[]){
 int readNumber(char v[], int start){
 	int i = start, reading = 0, res = FAIL; 
 	int menos = 0;
-	char c = v[i];
+	char c = v[i++];
 	while(reading == 0 || !isspace(c)){
 		if(reading == 0 && !isspace(c)){ /* the input will now be read */
 			res = 0;
@@ -274,8 +273,7 @@ int readNumber(char v[], int start){
 		else if(c == '.'){
 			return FAIL; 
 		}
-		i++;
-		c = v[i];
+		c = v[i++];
 	}
 	if(menos == 1 && res != FAIL){
 		res = -res;
@@ -286,17 +284,15 @@ int readNumber(char v[], int start){
 /* reads a portion of a string and stores the description in s */
 void readTaskAtv(char v[], char *s, int start, int max){ 
 	int i = start, index = 0, reading = 0;
-	char c = v[i];
+	char c = v[i++];
 	while(COND && index < max){
 		if (!reading && !isspace(c)){
 			reading++;
 		}
 		if(reading){
-			s[index] = c;
-			index++;
+			s[index++] = c;
 		}
-		i++;
-		c = v[i];
+		c = v[i++];
 	}
 	return;
 }
@@ -304,7 +300,7 @@ void readTaskAtv(char v[], char *s, int start, int max){
 /* reads a portion of a string and stores the username in s */
 void readUser(char v[], char *s, int start, int max){
 	int i = start, index = 0, stop = 0, reading = 0;
-	char c = v[i];
+	char c = v[i++];
 	while(COND && index < max && !stop){
 		if(reading == 0 && !isspace(c)){
 			reading++;
@@ -318,8 +314,7 @@ void readUser(char v[], char *s, int start, int max){
 				index++;
 			}
 		}
-		i++;
-		c = v[i];
+		c = v[i++];
 	}
 	return;
 }
@@ -327,15 +322,13 @@ void readUser(char v[], char *s, int start, int max){
 /* returns v's index after the whitespace found after a certain number/word */
 int getNextIndex(char v[], int start){
 	int i = start, reading = 0;
-	char c = v[i];
+	char c = v[i++];
 	while(!reading || !isspace(c)){
 		if(!reading && !isspace(c)){
 			reading++;
 		}
-		i++;
-		c = v[i];
+		c = v[i++];
 	}
-	i++;
 	return i;
 }
 
