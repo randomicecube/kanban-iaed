@@ -100,6 +100,7 @@ typedef struct activity{
 
 /* -------------------------------PROTOTYPES-------------------------------- */
 
+void endProgram();
 void addTask(char read[]);
 void addUser(char read[]);
 void addActivity(char read[]);
@@ -145,4 +146,3 @@ int amAtvs = 0;
 
 /* at 0 the program keeps running, at 1 it stops */
 int state = 0;
-

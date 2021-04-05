@@ -19,13 +19,17 @@ int main(){
 		redirectCommand(input);
 		strcpy(input, ""); /* clear the input array for the next input */
 	}while(!state);
-
 	return 0;
 }
 
+/* end the program's execution - 'q' command */
+void endProgram(){
+	state++;
+	return;
+}
 /* adds a task to the system - 't' command */
 void addTask(char read[]){
-	int index, pd = 0; /* index of the character being read, pred. duration */
+	int index, pd = 0; 
 	char temp[MAX_TASKL] = {'\0'};
 
 	if(amTasks == MAX_TASK){ /* the system cannot accept more tasks */
@@ -46,7 +50,7 @@ void addTask(char read[]){
 		return;
 	}
 
-	updateTaskVec(temp, pd);
+	updateTaskVec(temp, pd); 
 	return;
 }
 
@@ -95,28 +99,14 @@ void addActivity(char read[]){
 
 /* advances the system's time - 'n' command*/
 void advance(char read[]){
-	int i = START;
 	int time = 0;
-	int reading = 0; /* 0: hasn't found a whitespace; 1: found it */
-	char c = read[i];
-
-	while(COND && (!isspace(c) || reading == 0)){
-		if(c == '-' || c == '.'){ /* if a negative/float was in the input */
-			printf(TIME_INVALID);
-			return;
-		}
-		else{
-			if(!reading){ /* a digit is being read for the first time */
-				reading = 1;
-			}
-			time = time * 10 + (c - '0');
-		}
-		i++;
-		c = read[i];
+	time = readNumber(read, START);
+	if(time < 0){
+		printf(TIME_INVALID);
+		return;
 	}
 	currentTime += time;
 	printf("%d\n", currentTime);
-	
 	return;
 }
 
@@ -271,15 +261,18 @@ int readNumber(char v[], int start){
 	int menos = 0;
 	char c = v[i];
 	while(reading == 0 || !isspace(c)){
-		if(reading == 0 && !isspace(c)){
+		if(reading == 0 && !isspace(c)){ /* the input will now be read */
 			res = 0;
 			reading = 1;
 		}
 		if(isdigit((int) c)){
 		 	res = res * 10 + (c - '0');
 		}
-		if(c == '-'){
+		else if(c == '-'){
 			menos = 1;
+		}
+		else if(c == '.'){
+			return FAIL; 
 		}
 		i++;
 		c = v[i];
@@ -331,7 +324,7 @@ void readUser(char v[], char *s, int start, int max){
 	return;
 }
 
-/* returns the v's index after the whitespace found after a number/word */
+/* returns v's index after the whitespace found after a certain number/word */
 int getNextIndex(char v[], int start){
 	int i = start, reading = 0;
 	char c = v[i];
@@ -370,21 +363,22 @@ int dupSearch(char mode, char s[]){
 	switch(mode){
 		case TASK: /* comparing task descriptions */
 			for(i = 0; i < amTasks && dup == 0; i++){
-				if(strcmp(s, taskProp[i].desc) == 0) dup++;
+				if(!strcmp(s, taskProp[i].desc)) 
+					dup++;
 			}
 			break;
 		case USER: /* comparing user descriptions */
 			for(i = 0; i < amUsers && dup == 0; i++){
-				if(strcmp(s, userProp[i].desc) == 0) dup++;
+				if(!strcmp(s, userProp[i].desc)) 
+					dup++;
 			}
 			break;
 		case ATV: /* comparing activity descriptions */
 			for(i = 0; i < amAtvs && dup == 0; i++){
-				if(strcmp(s, atvProp[i].desc) == 0) dup++;
+				if(!strcmp(s, atvProp[i].desc)) 
+					dup++;
 			}
-			break;
-		default:
-			break;
+			break; /* no need for a default case here */
 	}
 	return dup;
 }
