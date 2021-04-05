@@ -100,7 +100,6 @@ typedef struct activity{
 
 /* -------------------------------PROTOTYPES-------------------------------- */
 
-void endProgram();
 void addTask(char read[]);
 void addUser(char read[]);
 void addActivity(char read[]);

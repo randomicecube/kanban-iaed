@@ -22,11 +22,6 @@ int main(){
 	return 0;
 }
 
-/* end the program's execution - 'q' command */
-void endProgram(){
-	state++;
-	return;
-}
 /* adds a task to the system - 't' command */
 void addTask(char read[]){
 	int index, pd = 0; 
@@ -217,7 +212,7 @@ void start(){
 void redirectCommand(char input[]){
 	switch(input[0]){ /* we know the command character is always the first */
 		case 'q':
-			endProgram();
+			state++;
 			break;
 		case 't':
 			addTask(input);
