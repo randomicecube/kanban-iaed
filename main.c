@@ -17,7 +17,7 @@ int main(){
 	do{
 		fgets(input, MAX_LENGTH, stdin);
 		redirectCommand(input);
-		strcpy(input, ""); /* clear the input array for the next input */
+		input[0] = '\0'; /* clear the input array for the next input */
 	}while(!state);
 	return 0;
 }
@@ -123,6 +123,9 @@ void listTasks(char read[]){
 					taskProp[any].pd, taskProp[any].desc);
 			idCount++;
 		}
+		if(j == FAIL && idCount > 0){
+			return; /* in case there are no more indexes to be read */
+		}
 		c = read[j];
 	}
 
@@ -171,19 +174,13 @@ void moveTasks(char read[]){
 	idTemp = readNumber(read, START);
 	i = getNextIndex(read, START);
 
-	if(anyId(idTemp, amTasks, taskProp) == FAIL){ 
-		printf(NO_ID_M); /* if the ID isn't in the system */
-		return;
-	}
-
 	readUser(read, username, i, MAX_USERL);
 	readTaskAtv(read, afterDesc, getNextIndex(read, i), MAX_ATVL);
 	wrongUser = dupSearch(USER, username);
 	wrongAtv = dupSearch(ATV, afterDesc);
-	
 	afterTask = findIndexTask(taskProp, idTemp);
 	strcpy(temp, taskProp[afterTask].currAtv);
-	if(printErrorsMove(temp, afterDesc, wrongUser, wrongAtv)){
+	if(printErrorsMove(idTemp, temp, afterDesc, wrongUser, wrongAtv)){
 		return; /* returns to main if there were any errors found */
 	}
 	beforeAtv = findIndexAtv(atvProp, temp);
@@ -279,7 +276,7 @@ int readNumber(char v[], int start){
 void readTaskAtv(char v[], char *s, int start, int max){ 
 	int i = start, index = 0, reading = 0;
 	char c = v[i++];
-	while(COND(c) && index < max){
+	while(COND(c) && index < max - 1){
 		if (!reading && !isspace(c)){
 			reading++;
 		}
@@ -288,6 +285,7 @@ void readTaskAtv(char v[], char *s, int start, int max){
 		}
 		c = v[i++];
 	}
+	s[index] = '\0';
 	return;
 }
 
@@ -295,7 +293,7 @@ void readTaskAtv(char v[], char *s, int start, int max){
 void readUser(char v[], char *s, int start, int max){
 	int i = start, index = 0, stop = 0, reading = 0;
 	char c = v[i++];
-	while(COND(c) && index < max && !stop){
+	while(COND(c) && index < max - 1 && !stop){
 		if(reading == 0 && !isspace(c)){
 			reading++;
 		}
@@ -310,6 +308,7 @@ void readUser(char v[], char *s, int start, int max){
 		}
 		c = v[i++];
 	}
+	s[index] = '\0';
 	return;
 }
 
@@ -317,7 +316,10 @@ void readUser(char v[], char *s, int start, int max){
 int getNextIndex(char v[], int start){
 	int i = start, reading = 0;
 	char c = v[i++];
-	while(!reading || !isspace(c)){
+	while((!reading || !isspace(c))){
+		if(!COND(c)){
+			return FAIL;
+		}
 		if(!reading && !isspace(c)){
 			reading++;
 		}
@@ -395,14 +397,18 @@ void bubble(task v[], int cap, int func){
 }
 
 /* aux to moveTasks, prints some of the possible error messages */
-int printErrorsMove(char befDesc[], char atvDesc[], int wUser, int wAtv){
+int printErrorsMove(int id, char befDesc[], char atvDesc[], int wUser, int wAtv){
 	int error = 0;
-	if(!strcmp(atvDesc, S_TODO) && strcmp(befDesc, S_TODO)){
-		printf(T_STARTED); /* if the "going to" activity is TO DO */
-		error++;
+	if(anyId(id, amTasks, taskProp) == FAIL){ 
+		printf(NO_ID_M); /* if the ID isn't in the system */
+		error ++;
 	}
 	else if(!strcmp(atvDesc, S_TODO) && !strcmp(befDesc, S_TODO)){
 		error++; /* the program still stops if both befDesc and aDesc are S_TODO */
+	}
+	else if(!strcmp(atvDesc, S_TODO) && strcmp(befDesc, S_TODO)){
+		printf(T_STARTED); /* if the "going to" activity is TO DO */
+		error++;
 	}
 	else if(wUser == ZERO){
 		printf(U_NOTFOUND); /* if the username is not in the system */

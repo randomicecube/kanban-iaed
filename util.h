@@ -14,7 +14,7 @@
 #define MAX_ATV 10
 
 /* max input length */
-#define MAX_LENGTH 100000
+#define MAX_LENGTH 50000
 /* max username length */
 #define MAX_USERL 21
 /* max task description length */
@@ -119,7 +119,7 @@ int getNextIndex(char v[], int start);
 int dupSearch(char mode, char s[]);
 void printList(task v[], int n, int func);
 void bubble(task v[], int cap, int func);
-int printErrorsMove(char befDesc[], char atvDesc[], int wUser, int wAtv);
+int printErrorsMove(int id, char befDesc[], char atvDesc[], int wUser, int wAtv);
 int findIndexTask(task v[], int id);
 int findIndexAtv(atv v[], char desc[]);
 void update_printMove(int beforeIndex, int afterIndex, int afterT, char beforeA[], char afterA[]);
