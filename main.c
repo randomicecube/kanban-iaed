@@ -109,7 +109,7 @@ void listTasks(char read[]){
 	int j = START, idTemp = 0, idCount = 0, error = 0, any;
 	char c = read[j];
 
-	while(COND){
+	while(COND(c)){
 		idTemp = readNumber(read, j);
 		j = getNextIndex(read, j);
 		any = anyId(idTemp, amTasks, taskProp);
@@ -128,7 +128,7 @@ void listTasks(char read[]){
 
 	if(!error && !idCount){ /*if the input was literally 'l' */
 		bubble(taskProp, amTasks, LT);
-		printListTasks(taskProp, amTasks);
+		printList(taskProp, amTasks, LT);
 	}
 	return;
 }
@@ -159,7 +159,7 @@ void listAtvTasks(char read[]){
 		}
 	}
 	bubble(atvTasks, wantedAtv.noTasks, LAT);
-	printListAtvTasks(atvTasks, wantedAtv.noTasks);
+	printList(atvTasks, wantedAtv.noTasks, LAT);
 	return;
 }
 
@@ -279,7 +279,7 @@ int readNumber(char v[], int start){
 void readTaskAtv(char v[], char *s, int start, int max){ 
 	int i = start, index = 0, reading = 0;
 	char c = v[i++];
-	while(COND && index < max){
+	while(COND(c) && index < max){
 		if (!reading && !isspace(c)){
 			reading++;
 		}
@@ -295,7 +295,7 @@ void readTaskAtv(char v[], char *s, int start, int max){
 void readUser(char v[], char *s, int start, int max){
 	int i = start, index = 0, stop = 0, reading = 0;
 	char c = v[i++];
-	while(COND && index < max && !stop){
+	while(COND(c) && index < max && !stop){
 		if(reading == 0 && !isspace(c)){
 			reading++;
 		}
@@ -326,20 +326,22 @@ int getNextIndex(char v[], int start){
 	return i;
 }
 
-/* used in listTasks to print the tasks' information */
-void printListTasks(task v[], int n){
+/* used in listTasks/listAtvTasks to print the tasks' information */
+void printList(task v[], int n, int func){
 	int i;
-	for(i = 0; i < n; i++){
-		printf("%d %s #%d %s\n", v[i].id, v[i].currAtv, v[i].pd, v[i].desc);
-	}
-	return;
-}
-
-/* used in listAtvTasks to print the tasks' information */
-void printListAtvTasks(task v[], int n){
-	int i;
-	for(i = 0; i < n; i++){
-		printf("%d %d %s\n", v[i].id, v[i].st, v[i].desc);
+	switch(func){
+		case LT:
+			for(i = 0; i < n; i++){
+				printf("%d %s #%d %s\n", v[i].id, v[i].currAtv, v[i].pd, v[i].desc);
+			}
+			break;
+		case LAT:
+			for(i = 0; i < n; i++){
+				printf("%d %d %s\n", v[i].id, v[i].st, v[i].desc);
+			}
+			break;
+		default:
+			break;
 	}
 	return;
 }
@@ -429,7 +431,7 @@ int findIndexTask(task v[], int idTemp){
 int findIndexAtv(atv v[], char description[]){
 	int i, res = 0, found = 0;
 	for(i = 0; i < amAtvs && !found; i++){
-		if(strcmp(description, v[i].desc) == 0){
+		if(!strcmp(description, v[i].desc)){
 			res = i;
 			found++;
 		}
@@ -476,7 +478,7 @@ void updateTaskVec(char desc[], int pd){
 	return;
 }
 
-/* finds errors in addActivity */
+/* finds (and prints) errors in addActivity */
 int findErrorAddAtv(char desc[]){
 	int j;
 	for(j = 0; j < amAtvs; j++){

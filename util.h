@@ -23,13 +23,14 @@
 #define MAX_ATVL 21
 
 /* condition to stop reading input - the user is done writing */
-#define COND (c != '\0' && c != '\n' && c != EOF)
+#define COND(c) (c != '\0' && c != '\n' && c != EOF)
+
 /* used in some functions to indicate that the search has failed  */
 #define FAIL -1
 #define ZERO 0
-/* used in the bubble function */
+/* used in the bubble function, to indicate it's aux'ing listTasks */
 #define LT 0
-/* used in the bubble function */
+/* used in the bubble function, to indicate it's aux'ing listAtv Tasks */
 #define LAT 1
 /* start reading from the input after considering the command character */
 #define START 2
@@ -116,8 +117,7 @@ void readUser(char v[], char *s, int start, int max);
 void readTaskAtv(char v[], char *s, int start, int max);
 int getNextIndex(char v[], int start);
 int dupSearch(char mode, char s[]);
-void printListTasks(task v[], int n);
-void printListAtvTasks(task v[], int n);
+void printList(task v[], int n, int func);
 void bubble(task v[], int cap, int func);
 int printErrorsMove(char befDesc[], char atvDesc[], int wUser, int wAtv);
 int findIndexTask(task v[], int id);
