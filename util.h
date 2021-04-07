@@ -119,7 +119,7 @@ int dupSearch(char mode, char s[]);
 void printListTasks(task v[], int n);
 void printListAtvTasks(task v[], int n);
 void bubble(task v[], int cap, int func);
-int printErrorsMove(char atvDesc[], int wUser, int wAtv);
+int printErrorsMove(char befDesc[], char atvDesc[], int wUser, int wAtv);
 int findIndexTask(task v[], int id);
 int findIndexAtv(atv v[], char desc[]);
 void update_printMove(int beforeIndex, int afterIndex, int afterT, char beforeA[], char afterA[]);

@@ -40,7 +40,7 @@ void addTask(char read[]){
 		printf(T_EXISTS);
 		return;
 	}
-	else if(pd < 0){ /* if the duration is a negative integer */
+	else if(pd <= 0){ /* if the duration is a negative integer */
 		printf(INV_DUR);
 		return;
 	}
@@ -180,13 +180,12 @@ void moveTasks(char read[]){
 	readTaskAtv(read, afterDesc, getNextIndex(read, i), MAX_ATVL);
 	wrongUser = dupSearch(USER, username);
 	wrongAtv = dupSearch(ATV, afterDesc);
-
-	if(printErrorsMove(afterDesc, wrongUser, wrongAtv)){
-		return; /* returns to main if there were any errors found */
-	}
 	
 	afterTask = findIndexTask(taskProp, idTemp);
 	strcpy(temp, taskProp[afterTask].currAtv);
+	if(printErrorsMove(temp, afterDesc, wrongUser, wrongAtv)){
+		return; /* returns to main if there were any errors found */
+	}
 	beforeAtv = findIndexAtv(atvProp, temp);
 	afterAtv = findIndexAtv(atvProp, afterDesc);
 	update_printMove(beforeAtv, afterAtv, afterTask, temp, afterDesc);
@@ -394,11 +393,14 @@ void bubble(task v[], int cap, int func){
 }
 
 /* aux to moveTasks, prints some of the possible error messages */
-int printErrorsMove(char atvDesc[], int wUser, int wAtv){
+int printErrorsMove(char befDesc[], char atvDesc[], int wUser, int wAtv){
 	int error = 0;
-	if(!strcmp(atvDesc, S_TODO)){
+	if(!strcmp(atvDesc, S_TODO) && strcmp(befDesc, S_TODO)){
 		printf(T_STARTED); /* if the "going to" activity is TO DO */
 		error++;
+	}
+	else if(!strcmp(atvDesc, S_TODO) && !strcmp(befDesc, S_TODO)){
+		error++; /* the program still stops if both befDesc and aDesc are S_TODO */
 	}
 	else if(wUser == ZERO){
 		printf(U_NOTFOUND); /* if the username is not in the system */
