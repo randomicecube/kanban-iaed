@@ -58,7 +58,7 @@ void addUser(char read[]){
     if(dupSearch(USER, temp)){ /* if it already exists */
         printf(U_EXISTS);
     }
-	else if(amUsers == MAX_USER){ /* if the system can't accept more users */
+	else if(amUsers == MAX_USER && strcmp(temp, "")){ /* if the system can't accept more users */
 		printf(U_TOOMANY);
 	}
 	else if(strcmp(temp, "")){ /* if the system is adding a user */
@@ -299,8 +299,7 @@ void readUser(char v[], char *s, int start, int max){
 				stop++;
 			}
 			else{
-				s[index] = c;
-				index++;
+				s[index++] = c;
 			}
 		}
 		c = v[i++];
