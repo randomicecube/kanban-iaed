@@ -106,7 +106,7 @@ void advance(char read[]){
 
 /* lists all the tasks/a subset of tasks in the system - 'l' command */
 void listTasks(char read[]){
-	int j = START, idTemp = 0, idCount = 0, error = 0, any;
+	int j = START, idTemp, idCount = 0, error = 0, any;
 	char c = read[j];
 
 	while(COND(c)){
@@ -129,7 +129,7 @@ void listTasks(char read[]){
 		c = read[j];
 	}
 
-	if(!error && !idCount){ /*if the input was literally 'l' */
+	if(!error && idCount == 0){ /*if the input was literally 'l' */
 		bubble(taskProp, amTasks, LT);
 		printList(taskProp, amTasks, LT);
 	}
@@ -176,8 +176,8 @@ void moveTasks(char read[]){
 
 	readUser(read, username, i, MAX_USERL);
 	readTaskAtv(read, afterDesc, getNextIndex(read, i), MAX_ATVL);
-	wrongUser = dupSearch(USER, username);
-	wrongAtv = dupSearch(ATV, afterDesc);
+	wrongUser = dupSearch(USER, username); /*check if username is in the system */
+	wrongAtv = dupSearch(ATV, afterDesc); /*check if afterDesc is in the system */
 	afterTask = findIndexTask(taskProp, idTemp);
 	strcpy(temp, taskProp[afterTask].currAtv);
 	if(printErrorsMove(idTemp, temp, afterDesc, wrongUser, wrongAtv)){
@@ -260,9 +260,6 @@ int readNumber(char v[], int start){
 		}
 		else if(c == '-'){
 			menos = 1;
-		}
-		else if(c == '.'){
-			return FAIL; 
 		}
 		c = v[i++];
 	}
