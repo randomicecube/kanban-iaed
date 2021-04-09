@@ -118,13 +118,14 @@ void readTaskAtv(char v[], char *s, int start, int max);
 int getNextIndex(char v[], int start);
 int dupSearch(char mode, char s[]);
 void printList(task v[], int n, int func);
-void bubble(task v[], int cap, int func);
 int printErrorsMove(int id, char befDesc[], char atvDesc[], int wUser, int wAtv);
 int findIndexTask(task v[], int id);
 int findIndexAtv(atv v[], char desc[]);
 void update_printMove(int beforeIndex, int afterIndex, int afterT, char beforeA[], char afterA[]);
 void updateTaskVec(char desc[], int pd);
 int findErrorAddAtv(char desc[]);
+void shellDesc(task v[], int cap);
+void shellSt(task v[], int cap);
 
 /* -------------------------------GLOBAL VARS------------------------------- */
 

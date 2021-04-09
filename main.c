@@ -130,7 +130,7 @@ void listTasks(char read[]){
 	}
 
 	if(!error && idCount == 0){ /*if the input was literally 'l' */
-		bubble(taskProp, amTasks, LT);
+		shellDesc(taskProp, amTasks);
 		printList(taskProp, amTasks, LT);
 	}
 	return;
@@ -161,7 +161,7 @@ void listAtvTasks(char read[]){
 			atvTasks[index++] = taskProp[i];
 		}
 	}
-	bubble(atvTasks, wantedAtv.noTasks, LAT);
+	shellSt(atvTasks, wantedAtv.noTasks);
 	printList(atvTasks, wantedAtv.noTasks, LAT);
 	return;
 }
@@ -371,23 +371,40 @@ int dupSearch(char mode, char s[]){
 }
 
 /* sorts a given array of tasks */
-void bubble(task v[], int cap, int func){
-	/* func == LT -> listTasks; func == LAT -> listAtvTasks */
-	int i, changed = 1;
-	task temp;
-	while(changed){
-		changed = 0;
-		for(i = 0; i < cap - 1; i++){
-			if((v[i].st > v[i + 1].st && func == LAT) || \
-			(((v[i].st == v[i + 1].st || func == LT))&& \
-			(strcmp(v[i].desc, v[i + 1].desc) > 0))){
-				temp = v[i];
-				v[i] = v[i + 1];
-				v[i + 1] = temp;
-				changed++;
+void shellDesc(task v[], int cap){
+	int i, sep, j;
+	task tempTask;
+	for(sep = cap/2; sep > 0; sep /= 2){
+		for(i = sep; i < cap; i++){
+			tempTask = v[i];
+			for(j = i; j >= sep && strcmp(tempTask.desc, v[j - sep].desc) < 0; j-= sep){
+				v[j] = v[j - sep];
 			}
+			v[j] = tempTask;
 		}
-		cap--;
+	}
+	return;
+}
+
+void shellSt(task v[], int cap){
+	int i, sep, j, stop = 0;
+	task tempTask;
+	for(sep = cap/2; sep > 0; sep /= 2){
+		for(i = sep; i < cap; i++){
+			for(j = i - sep; j >= 0 && stop == 0; j -= sep){
+				if(v[j + sep].st > v[j].st){
+					stop = 1;
+				}
+				else if((v[j + sep].st < v[j].st) ||
+						(v[j + sep].st == v[j].st &&
+						strcmp(v[j + sep].desc, v[j].desc) < 0)){
+					tempTask = v[j];
+					v[j] = v[j + sep];
+					v[j + sep] = tempTask;
+				}
+			}
+			stop = 0;
+		}
 	}
 	return;
 }
