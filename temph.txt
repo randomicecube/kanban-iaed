@@ -23,10 +23,7 @@
 #define MAX_ATVL 21
 
 /* condition to stop reading input - the user is done writing */
-#define COND(c) (c != '\0' && c != '\n' && c != EOF)
-
-/* exchange task values (used within task arrays) */
-#define exch(A, B) {task T = A; A = B; B = T;}
+#define COND(c) (c != '\n' && c != EOF)
 
 /* used in some functions to indicate that the search has failed  */
 #define FAIL -1
@@ -35,8 +32,6 @@
 #define LT 0
 /* used in the bubble function, to indicate it's aux'ing listAtv Tasks */
 #define LAT 1
-/* start reading from the input after considering the command character */
-#define START 2
 
 /* task-related print and error messages */
 #define T_TOOMANY "too many tasks\n"
@@ -76,7 +71,7 @@
 
 /* struct representing an instance of a task, including its properties */
 typedef struct task{
-    /* the task's predicted duration, starting time, id and actual duration */
+    /* the task's predicted duration, starting time, id , duration and slack */
     int pd;
     int st;
     int id;
@@ -104,31 +99,31 @@ typedef struct activity{
 
 /* -------------------------------PROTOTYPES-------------------------------- */
 
-void addTask(char read[]);
-void addUser(char read[]);
-void addActivity(char read[]);
-void advanceTime(char read[]);
-void listTasks(char read[]);
-void listAtvTasks(char read[]);
-void moveTasks(char read[]);
+void addTask();
+void addUser();
+void addActivity();
+void advance();
+void listTasks();
+void listAtvTasks();
+void moveTasks();
 
 void start();
-void redirectCommand(char input[]);
+void redirectCommand(char c);
 int anyId(int n, int size, task v[]);
-int readNumber(char v[], int start);
-void readTaskAtv(char v[], char *s, int start, int max);
-void readUser(char v[], char *s, int start, int max);
-int getNextIndex(char v[], int start);
+char readTaskAtv(char *s, int max);
+char readUser(char *s, int max);
+int readNumber();
 void printList(task v[], int n, int func);
 int dupSearch(char mode, char s[]);
-void shellL(int cap);
-void bubbleD(task v[], int cap);
+void shellDesc(task v[], int cap);
+void shellSt(task v[], int cap);
 int printErrorsMove(int id, char befDesc[], char atvDesc[], int wUser, int wAtv);
 int findIndexTask(task v[], int id);
 int findIndexAtv(atv v[], char desc[]);
 void update_printMove(int beforeIndex, int afterIndex, int afterT, char beforeA[], char afterA[]);
 void updateTaskVec(char desc[], int pd);
 int findErrorAddAtv(char desc[]);
+void skipLine(char c);
 
 /* -------------------------------GLOBAL VARS------------------------------- */
 

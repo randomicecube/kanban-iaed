@@ -1,6 +1,6 @@
 /*
  * File: main.c
- * Author: Diogo Gaspar, 99207 - LEIC-A
+ * Author: Diogo Gaspar, 99207, LEIC-A
  * Description: Main program file
  */
 
@@ -12,35 +12,33 @@
 
 /* main program function */
 int main(){
-	char input[MAX_LENGTH];
+	char command;
 	start();
 	do{
-		fgets(input, MAX_LENGTH, stdin);
-		redirectCommand(input);
-		input[0] = '\0'; /* clear the input array for the next line */
+		printf("%c\n", command);
+		command = getchar();
+		redirectCommand(command);
 	}while(!state);
 	return 0;
 }
 
 /* adds a task to the system - 't' command */
-void addTask(char read[]){
-	int index, pd = 0; 
-	char temp[MAX_TASKL] = {'\0'};
-
-	if(amTasks == MAX_TASK){
+void addTask(){
+	int pd = 0; 
+	char c, temp[MAX_TASKL] = {'\0'};
+	
+	scanf("%d", &pd); /* reading the predicted duration */
+	c = readTaskAtv(temp, MAX_TASKL); /* reading description */
+	skipLine(c);
+	if(amTasks == MAX_TASK){ /* the system cannot accept more tasks */
     	printf(T_TOOMANY);
 		return;
 	}
-	
-	pd = readNumber(read, START); 
-	index = getNextIndex(read, START);
-
-	readTaskAtv(read, temp, index, MAX_TASKL);	
-	if(dupSearch(TASK, temp)){
+	else if(dupSearch(TASK, temp)){ /* if it already exists */
 		printf(T_EXISTS);
 		return;
 	}
-	else if(pd <= 0){
+	else if(pd <= 0){ /* if the duration is a negative integer */
 		printf(INV_DUR);
 		return;
 	}
@@ -50,22 +48,23 @@ void addTask(char read[]){
 }
 
 /* adds a user to the system/lists all users by creation date - 'u' command */
-void addUser(char read[]){
+void addUser(){
 	int j;
-    char temp[MAX_USERL] = {'\0'};
+    char c, temp[MAX_USERL] = {'\0'};
 	
-	readUser(read, temp, START, MAX_USERL); 
-    if(dupSearch(USER, temp)){
+	c = readUser(temp, MAX_USERL); /* reading description */
+	skipLine(c);
+    if(dupSearch(USER, temp)){ /* if it already exists */
         printf(U_EXISTS);
     }
-	else if(amUsers == MAX_USER && strcmp(temp, "")){
+	else if(amUsers == MAX_USER && strcmp(temp, "")){ /* if the system can't accept more users */
 		printf(U_TOOMANY);
 	}
-	else if(strcmp(temp, "")){ /* add user */
+	else if(strcmp(temp, "")){ /* if the system is adding a user */
     	strcpy(userProp[amUsers++].desc, temp);
  	}
-	else{
-		for(j = 0; j < amUsers; j++){ /* list all users */
+	else{ /* if the request is to print all usernames */
+		for(j = 0; j < amUsers; j++){
 			printf("%s\n", userProp[j].desc);
 		}
 	}
@@ -73,11 +72,12 @@ void addUser(char read[]){
 }
 
 /* adds an activity to the system/lists all activities - 'a' command */
-void addActivity(char read[]){
+void addActivity(){
 	int j;
-    char temp[MAX_ATVL] = {'\0'};
+    char c, temp[MAX_ATVL] = {'\0'};
 
-	readTaskAtv(read, temp, START, MAX_ATVL);
+	c = readTaskAtv(temp, MAX_ATVL);
+	skipLine(c);
     if(findErrorAddAtv(temp) == FAIL){
 		return;
 	}
@@ -93,8 +93,9 @@ void addActivity(char read[]){
 }
 
 /* advances the system's time - 'n' command*/
-void advanceTime(char read[]){
-	int time = readNumber(read, START);
+void advance(){
+	int time;
+	scanf("%d", &time);
 	if(time < 0){
 		printf(TIME_INVALID);
 		return;
@@ -105,13 +106,11 @@ void advanceTime(char read[]){
 }
 
 /* lists all the tasks/a subset of tasks in the system - 'l' command */
-void listTasks(char read[]){
-	int j = START, idTemp, idCount = 0, error = 0, any;
-	char c = read[j];
-
+void listTasks(){
+	int idTemp, idCount = 0, error = 0, any;
+	char c = getchar();
 	while(COND(c)){
-		idTemp = readNumber(read, j);
-		j = getNextIndex(read, j);
+		scanf("%d", &idTemp);
 		any = anyId(idTemp, amTasks, taskProp);
 		if(any == FAIL){ /* if the ID is not in the system */
 			printf(T_NOID, idTemp);
@@ -123,30 +122,31 @@ void listTasks(char read[]){
 					taskProp[any].pd, taskProp[any].desc);
 			idCount++;
 		}
-		if(j == FAIL && idCount > 0){
-			return; /* in case there are no more indexes to be read */
-		}
-		c = read[j];
+		c = getchar();
 	}
-
-	if(!error && idCount == 0){ /*if the input was literally 'l' */
-		shellL(amTasks);
+	skipLine(c);
+	if(idCount > 0 || (idCount == 0 && error > 0)){
+		return;
+	}
+	else{ /*if the input was literally 'l' */
+		shellDesc(taskProp, amTasks);
 		printList(taskProp, amTasks, LT);
 	}
 	return;
 }
 
 /* prints the tasks currently in a given activity's scope - 'd' command */
-void listAtvTasks(char read[]){
-	int i, j = 0, index = 0, found = 0;
-	char activity[MAX_ATVL] = {'\0'};
+void listAtvTasks(){
+	int j = 0, index = 0, found = 0;
+	char c, activity[MAX_ATVL] = {'\0'};
 	task atvTasks[MAX_TASK] = {0};
 	atv wantedAtv;
 
-	readTaskAtv(read, activity, START, MAX_ATVL);
+	c = readTaskAtv(activity, MAX_ATVL);
+	skipLine(c);
 	/* checks if the activity is in the system */
 	for(j = 0; j < amAtvs && found == 0; j++){ 
-		if(!strcmp(atvProp[j].desc, activity)){
+		if(!strcmp(atvProp[j].desc, activity)){ /* if it is */
 			found++;
 			wantedAtv = atvProp[j];
 		}
@@ -156,28 +156,27 @@ void listAtvTasks(char read[]){
 		return;
 	}
 	/* stores the tasks in the activity's scope in a to-be-sorted array */
-	for(i = 0; i < amTasks; i++){
-		if(!strcmp(taskProp[i].currAtv, wantedAtv.desc)){
-			atvTasks[index++] = taskProp[i];
+	for(j = 0; j < amTasks; j++){
+		if(!strcmp(taskProp[j].currAtv, wantedAtv.desc)){
+			atvTasks[index++] = taskProp[j];
 		}
 	}
-	bubbleD(atvTasks, wantedAtv.noTasks);
+	shellSt(atvTasks, wantedAtv.noTasks);
 	printList(atvTasks, wantedAtv.noTasks, LAT);
 	return;
 }
 
 /* moves a Task from an activity to the other; 'm' command */
-void moveTasks(char read[]){
-	int i, idTemp, afterAtv, beforeAtv, afterTask, wrongUser = 0, wrongAtv = 0;
-	char username[MAX_USERL] = {'\0'}, afterDesc[MAX_ATVL] = {'\0'}, temp[MAX_ATVL] = {'\0'};
+void moveTasks(){
+	int idTemp, afterAtv, beforeAtv, afterTask, wrongUser = 0, wrongAtv = 0;
+	char c, username[MAX_USERL] = {'\0'}, afterDesc[MAX_ATVL] = {'\0'}, temp[MAX_ATVL] = {'\0'};
 	
-	idTemp = readNumber(read, START);
-	i = getNextIndex(read, START);
-
-	readUser(read, username, i, MAX_USERL);
-	readTaskAtv(read, afterDesc, getNextIndex(read, i), MAX_ATVL);
-	wrongUser = dupSearch(USER, username);
-	wrongAtv = dupSearch(ATV, afterDesc);
+	scanf("%d", &idTemp);
+	c = readUser(username, MAX_USERL);
+	c = readTaskAtv(afterDesc, MAX_ATVL);
+	skipLine(c);
+	wrongUser = dupSearch(USER, username); /*check if username is in the system */
+	wrongAtv = dupSearch(ATV, afterDesc); /*check if afterDesc is in the system */
 	afterTask = findIndexTask(taskProp, idTemp);
 	strcpy(temp, taskProp[afterTask].currAtv);
 	if(printErrorsMove(idTemp, temp, afterDesc, wrongUser, wrongAtv)){
@@ -193,42 +192,43 @@ void moveTasks(char read[]){
 
 /* starts the 3 "default" activities */
 void start(){
+	/* starting the 3 initial activities */
 	strcpy(atvProp[TODO].desc, S_TODO);
 	atvProp[TODO].noTasks = 0;
 	strcpy(atvProp[INPROGRESS].desc, S_INPROGRESS);
 	atvProp[INPROGRESS].noTasks = 0;
 	strcpy(atvProp[DONE].desc, S_DONE);
 	atvProp[DONE].noTasks = 0;
-	amAtvs += 3;
+	amAtvs += 3; /* activity count after adding the 3 atvs above*/
 	return;
 }
 
 /* redirects the program to a specific function, depending on the command */
-void redirectCommand(char input[]){
-	switch(input[0]){ /* we know the command character is always the first */
+void redirectCommand(char c){
+	switch(c){ /* we know the command character is always the first */
 		case 'q':
 			state++;
 			break;
 		case 't':
-			addTask(input);
+			addTask();
 			break;
 		case 'l':
-			listTasks(input);
+			listTasks();
 			break;
 		case 'n':
-			advanceTime(input);
+			advance();
 			break;
 		case 'u':
-			addUser(input);
+			addUser();
 			break;
 		case 'm':
-			moveTasks(input);
+			moveTasks();
 			break;
 		case 'd':
-			listAtvTasks(input);
+			listAtvTasks();
 			break;
 		case 'a':
-			addActivity(input); /* default not needed, command always right */
+			addActivity(); /* default not needed, command always right */
 	}
 	return;
 }
@@ -245,12 +245,12 @@ int anyId(int n, int size, task v[]){
 }
 
 /* reads a portion of a string and returns the first integer found*/
-int readNumber(char v[], int start){
-	int i = start, reading = 0, res = FAIL; 
+int readNumber(){
+	int reading = 0, res = FAIL; 
 	int menos = 0;
-	char c = v[i++];
+	char c = getchar();
 	while(reading == 0 || !isspace(c)){
-		if(reading == 0 && !isspace(c)){ /* the input will now be stored */
+		if(reading == 0 && !isspace(c)){ /* the input will now be read */
 			res = 0;
 			reading = 1;
 		}
@@ -260,7 +260,7 @@ int readNumber(char v[], int start){
 		else if(c == '-'){
 			menos = 1;
 		}
-		c = v[i++];
+		c = getchar();
 	}
 	if(menos == 1 && res != FAIL){
 		res = -res;
@@ -269,9 +269,9 @@ int readNumber(char v[], int start){
 }
 
 /* reads a portion of a string and stores the description in s */
-void readTaskAtv(char v[], char *s, int start, int max){ 
-	int i = start, index = 0, reading = 0;
-	char c = v[i++];
+char readTaskAtv(char *s, int max){ 
+	int index = 0, reading = 0;
+	char c = getchar();
 	while(COND(c) && index < max - 1){
 		if (!reading && !isspace(c)){
 			reading++;
@@ -279,48 +279,32 @@ void readTaskAtv(char v[], char *s, int start, int max){
 		if(reading){
 			s[index++] = c;
 		}
-		c = v[i++];
+		c = getchar();
 	}
 	s[index] = '\0';
-	return;
+	return c;
 }
 
 /* reads a portion of a string and stores the username in s */
-void readUser(char v[], char *s, int start, int max){
-	int i = start, index = 0, stop = 0, reading = 0;
-	char c = v[i++];
-	while(COND(c) && index < max - 1 && !stop){
-		if(reading == 0 && !isspace(c)){ /* the input will now be stored */
+char readUser(char *s, int max){
+	int index = 0, reading = 0;
+	char c = getchar();
+	while(COND(c) && index < max - 1){
+		if(reading == 0 && !isspace(c)){
 			reading++;
 		}
 		if(reading){
 			if(isspace(c)){
-				stop++;
+				return c;
 			}
 			else{
 				s[index++] = c;
 			}
 		}
-		c = v[i++];
+		c = getchar();
 	}
 	s[index] = '\0';
-	return;
-}
-
-/* returns v's index after the whitespace found after a certain number/word */
-int getNextIndex(char v[], int start){
-	int i = start, reading = 0;
-	char c = v[i++];
-	while((!reading || !isspace(c))){
-		if(!COND(c)){
-			return FAIL;
-		}
-		if(!reading && !isspace(c)){
-			reading++;
-		}
-		c = v[i++];
-	}
-	return i;
+	return c;
 }
 
 /* used in listTasks/listAtvTasks to print the tasks' information */
@@ -369,38 +353,42 @@ int dupSearch(char mode, char s[]){
 	return dup;
 }
 
-/* sorts a given array of tasks - 'l' command */
-void shellL(int cap){
-	int i, j, h;
+/* sorts a given array of tasks following the 'l' command rules */
+void shellDesc(task v[], int cap){
+	int i, sep, j;
 	task tempTask;
-	/* generates a h sequence - 1 4 13 40 121 ... */
-	for(h = 1; h <= cap/9; h = 3*h + 1);
-	for(; h > 0; h /= 3){
-		for(i = h; i <= cap; i++){
-			tempTask = taskProp[i];
-			for(j = i; j >= h && j < cap &&
-				strcmp(tempTask.desc, taskProp[j - h].desc) < 0; j -= h){
-				taskProp[j] = taskProp[j - h];
+	for(sep = cap/2; sep > 0; sep /= 2){
+		for(i = sep; i < cap; i++){
+			tempTask = v[i];
+			for(j = i; j >= sep && strcmp(tempTask.desc, v[j - sep].desc) < 0; j-= sep){
+				v[j] = v[j - sep];
 			}
-			taskProp[j] = tempTask;
+			v[j] = tempTask;
 		}
 	}
 	return;
 }
 
-/* sorts a given array of tasks - 'd' command */
-void bubbleD(task v[], int cap){
-	int max = cap - 1, changed = 1, i;
-	while(changed == 1){
-		changed = 0;
-		for(i = 0; i < max; i++){
-			if((v[i].st > v[i + 1].st) || 
-			(v[i].st == v[i + 1].st && strcmp(v[i].desc, v[i + 1].desc) > 0)){
-				exch(v[i], v[i + 1]);
-				changed = 1;
+/* sorts a given array of tasks following the 'd' command rules */
+void shellSt(task v[], int cap){
+	int i, sep, j, stop = 0;
+	task tempTask;
+	for(sep = cap/2; sep > 0; sep /= 2){
+		for(i = sep; i < cap; i++){
+			for(j = i - sep; j >= 0 && stop == 0; j -= sep){
+				if(v[j + sep].st > v[j].st){
+					stop = 1;
+				}
+				else if((v[j + sep].st < v[j].st) ||
+						(v[j + sep].st == v[j].st &&
+						strcmp(v[j + sep].desc, v[j].desc) < 0)){
+					tempTask = v[j];
+					v[j] = v[j + sep];
+					v[j + sep] = tempTask;
+				}
 			}
+			stop = 0;
 		}
-		max--;
 	}
 	return;
 }
@@ -514,4 +502,12 @@ int findErrorAddAtv(char desc[]){
 		return FAIL;
     }
 	return ZERO;
+}
+
+/* skips to the next line, ignoring the current line's remaining content */
+void skipLine(char c){
+	while(COND(c)){
+		c = getchar();
+	}
+	return;
 }
